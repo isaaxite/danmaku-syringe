@@ -152,7 +152,7 @@ class DanmakuInject {
   }
 }
 
-function initDanmakuArea(cb) {
+export function initDanmakuArea(cb) {
   let danmakuInjectIns = new DanmakuInject({
     cb: (rootEle) => {
       cb(rootEle);
