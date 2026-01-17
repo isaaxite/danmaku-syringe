@@ -1,7 +1,5 @@
 const { context } = require("esbuild");
 const { solidPlugin } = require("esbuild-plugin-solid");
-const { tailwindPlugin } = require("esbuild-plugin-tailwindcss");
-const stylePlugin = require("esbuild-style-plugin");
 
 const fs = require('fs');
 const postcss = require('postcss');
@@ -45,7 +43,6 @@ const cssInlinePlugin = {
 const opt = {
   entryPoints: ['./index.jsx'],
   bundle: true,
-  // target: ['chrome58', 'firefox57', 'edge16'],
   outfile: 'dist/index.js',
   plugins: [
     solidPlugin(),

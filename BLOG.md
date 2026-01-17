@@ -213,6 +213,21 @@ const cssInlinePlugin = {
 2. onLoad 控制的是，路径解析完后的内容
 
 
+# 迁移 esbuild 配置文件
+
+当前位置：`./scripts/build.js`。新的目标位置：`./esbuild.config.js`。
+
+这样会更加规范！
+
+目前可以预见的是：1）需要修改 `packagejson` 里的 `build` 等脚本。
+
+另外的动作：
+
+1. 移除目前无用的两个开发依赖（即非运行时依赖）：`esbuild-plugin-tailwindcss` 和 `esbuild-style-plugin`
+   1. [ x ] 删除 esbuild 配置文件中的代码；
+   2. [ x ] 移除 `node_modules` 中的包。
+
+
 # 附录
 
 - [esbuild 中文文档](https://esbuild.org.cn)
