@@ -1,15 +1,77 @@
 # 前言
 
+油猴脚本开发文档：https://www.tampermonkey.net/documentation.php
+
+当前这个项目使用 esbuild 打包，输出的包有以下两种类型：
+
 1. 浏览器插件；
    1. 打包输出多个文件入口；
 
 2. 油猴插件；
    1. 打包输出单个 js 文件；
 
+以下是油猴脚本的”外壳“，显然它是 `IIFE` 风格的。在脚本中，顶部的注释是具备含义的，它可以使用 esbuild 的第一层配置 [`.banner`](https://esbuild.org.cn/api/#banner)进行插入。
+
+```js
+// ==UserScript==
+// @name         New Userscript
+// @namespace    http://tampermonkey.net/
+// @version      2026-01-17
+// @description  try to take over the world!
+// @author       You
+// @match        https://esbuild.github.io/api/
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=github.io
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Your code here...
+})();
+```
+
+可以预见的 2 个esbuild 配置：
+
+```js
+import * as esbuild from 'esbuild'
+
+const comment = `// ==UserScript==
+// @name         New Userscript
+// @namespace    http://tampermonkey.net/
+// @version      2026-01-17
+// @description  try to take over the world!
+// @author       You
+// @match        https://esbuild.github.io/api/
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=github.io
+// @grant        none
+// ==/UserScript==
+`;
+
+await esbuild.build({
+  entryPoints: ['app.js'],
+  banner: {
+    js: comment
+  },
+  format: 'iife',
+  outfile: 'out.js',
+})
+```
+
 
 油猴插件开发先行，原因是易于测试发行版本功能；
 
 # 使用 esbuild
+
+    打包 - 将多个文件打包成一个或多个 bundle
+
+    压缩 - JavaScript、CSS 的极速压缩
+
+    转换 - 支持 TypeScript、JSX、TSX
+
+    代码分割 - 支持动态导入和代码分割
+
+    Tree shaking - 自动删除未使用代码
 
 > 默认情况下，esbuild 的打包器配置为生成针对浏览器的代码。
 
@@ -27,6 +89,81 @@
 - 在访问的 html 页面中添加 js 代码： `new EventSource('/esbuild').addEventListener('change', () => location.reload())`，监听事件触发刷新。 
 
 
+## esbuild 插件的生命周期
+
+插件在 esbuild 配置文件中的下面位置添加：
+
+```js
+const opt = {
+  entryPoints: ['./index.jsx'],
+  bundle: true,
+  outfile: 'dist/index.js',
+  plugins: [
+    solidPlugin(),
+    cssInlinePlugin,
+  ],
+  // ...
+};
+```
+
+插件有第三方（npm 或 github）和自己手写。两者生命周期中的钩子（callback）都一样，下面针对手写的展开。
+
+钩子由 `setup` 方法的第一个入参 `build` 的 4 个方法组成：
+
+1. `build.onStart`；
+2. `build.onEnd`；
+3. `build.onResolve`；
+4. `build.onLoad`。
+
+其中 `build.onResolve` 和 `build.onLoad` 重点关注。
+
+
+- `build.onResolve` 控制项目中引入的路径（`import`、`require`）如何解析（参考文档中的 https://esbuild.org.cn/plugins/#resolve），或改变其路径；
+- `build.onLoad` 控制的是，路径解析完后的内容。
+
+当前项目将 `tailwindcss` 注入到输出的 js 文件中，这个效果就是手写插件的 `build.onLoad` 起到作用。
+
+### 在构建过程中，根据什么判定执行这个 `onLoad` 插件的逻辑？
+
+esbuild 构建过程中，在分析导入语句（`import xx` 或 `require(xx)`），应该都会进行判断是否执行插件。
+
+```js
+build.onLoad({ filter: /\.css$/ }, async (args) => {
+  // ...
+}
+```
+
+> [filter](https://esbuild.github.io/plugins/#on-load-options)
+>
+> Every callback must provide a filter, which is a regular expression. The registered callback will be skipped when the path doesn't match this filter. You can read more about filters [here](https://esbuild.github.io/plugins/#filters). 
+
+判断是否执行的条件是 filter，即 `filter: /\.css$/`。正则匹配导入语句中的路径是否包含 `.css` 后缀。
+
+
+回调函数中的 content 和 loader
+
+
+loader 是什么？
+
+loader 不但在此处 `return` 出现，更平常在第一层配置中：
+
+```js
+const opt = {
+  entryPoints: ['./index.jsx'],
+  bundle: true,
+  outfile: 'dist/index.js',
+  // ...
+  loader: {
+    '.js': 'jsx',
+    '.jsx': 'jsx',
+  },
+  // ...
+```
+
+loader 告诉 esbuild 何种文件（根据文件扩展名）将被解析（转化）为何种类型的内容。
+
+
+1. 默认的 loader 有哪些？
 
 # 引入 solidjs
 
@@ -35,7 +172,12 @@
 
 打包到单个 js 包（油猴）：
 
-使用 esbuild-plugin-tailwindcss 插件 + tailwindcss 配置文件。
+- [ ] 使用 esbuild-plugin-tailwindcss 插件 + tailwindcss 配置文件；
+- [x] 使用 postcss + 手写 esbuild 插件。
+
+## 使用 esbuild-plugin-tailwindcss 插件 + tailwindcss 配置文件。
+
+*当前实践过后，选择器用。单纯插件无法让 tailwindcss 注入到产物（唯一的 js 文件）中间中*
 
 以下是待实践的配置
 
@@ -149,7 +291,9 @@ $ tree ./dist
 
 使用 “esbuild-plugin-tailwindcss 插件 + tailwindcss 配置文件” 方法的结果不理想，换用其他。
 
-使用 postcss + 手写 esbuild 插件
+## 使用 postcss + 手写 esbuild 插件
+
+*此为最后选择使用的方案*
 
 ```shell
 pnpm add -D postcss autoprefixer @tailwindcss/postcss
@@ -226,6 +370,50 @@ const cssInlinePlugin = {
 1. 移除目前无用的两个开发依赖（即非运行时依赖）：`esbuild-plugin-tailwindcss` 和 `esbuild-style-plugin`
    1. [ x ] 删除 esbuild 配置文件中的代码；
    2. [ x ] 移除 `node_modules` 中的包。
+
+
+# 我看见 2 个网站。都是 html 里嵌入 iframe，video 在 iframe 中。这是为何？
+
+这是一个很好的观察！**将视频放在 iframe 里嵌入主页面是一种非常常见且重要的前端架构策略**。这么做主要有以下几个核心原因：
+
+### 1. **模块化与隔离（最重要的原因）**
+   * **沙箱环境**： iframe 提供了天然的代码和样式隔离。视频播放器（尤其是第三方播放器如 Vimeo Pro、Wistia、Brightcove 或自定义播放器）通常是一个功能复杂的独立应用。放在 iframe 里可以：
+     * **避免 CSS 污染**： 防止主站样式意外影响播放器按钮、控制栏的布局和外观。
+     * **避免 JavaScript 冲突**： 防止主站的 JS 库（如 jQuery、React 等）与播放器自身的 JS 发生冲突。
+     * **保证稳定性**： 即使主站某个脚本出错，iframe 内的播放器通常仍能正常工作。
+
+### 2. **安全性与跨域控制**
+   * **内容安全策略**： 如果视频来自第三方平台或 CDN，iframe 是更安全的方式。主站可以控制 iframe 的权限（通过 `sandbox` 属性），例如禁止其执行脚本、提交表单或访问父页面 Cookie。
+   * **跨域通信可控**： 通过 `postMessage` API，主站和 iframe 内的视频播放器可以进行安全的、受控的通信（如播放/暂停、获取当前时间、全屏控制等），同时又保持了清晰的边界。
+
+### 3. **性能优化与懒加载**
+   * **独立加载和缓存**： 视频播放器（其 HTML、CSS、JS 和视频流）的加载可以与主页面的加载分离。如果用户不点击播放，播放器资源可以不加载或延迟加载。
+   * **避免阻塞主线程**： 视频编解码、缓冲、DRM 处理等操作可能比较消耗资源。放在 iframe 中，这些任务可以在单独的进程/线程中运行，减少对主页面交互响应的影响。
+   * **便于实现“画中画”模式**： 许多现代浏览器支持 iframe 级别的画中画功能，这种方式更容易实现。
+
+### 4. **功能与商业需求**
+   * **第三方专业平台集成**： Vimeo、Wistia、YouTube 等平台默认提供的嵌入代码就是 iframe。它们提供了丰富的后台功能（分析、热度图、线索收集、AB 测试），这些功能需要其播放器代码在一个可控环境中运行。
+   * **灵活的广告集成**： 许多视频广告联盟（如 Google IMA）要求在 iframe 环境中运行，以确保广告的展示、跟踪和安全性。
+   * **DRM（数字版权管理）**： 保护付费内容（如 Netflix、Disney+）的 DRM 系统（如 Widevine、PlayReady）对执行环境有严格要求，iframe 提供了一个更纯净、可控的环境来满足这些要求。
+
+### 5. **代码管理与更新**
+   * **独立部署**： 视频播放器团队可以独立开发、测试和部署播放器应用，只需更新 iframe 的源地址或播放器版本即可，无需触动主站代码。这符合微前端架构思想。
+   * **A/B 测试**： 可以轻松地更换不同版本的播放器（指向不同的 iframe URL）进行测试。
+
+### 技术实现对比
+* **传统 `<video>` 标签直接嵌入**： 简单、直接，但播放器样式和功能受主站环境影响大，难以实现复杂功能和第三方集成。
+* **`<iframe>` 嵌入播放器**： 隔离、安全、功能强大，是商业级、高要求视频网站的主流选择。你看到的两个网站很可能就是采用了这种更专业的方案。
+
+**简单总结：** 你看到的不是简单的“一个视频文件”，而是一个**功能完整的视频播放器应用**。用 iframe 装载这个应用，就像在一个房间里放了一台独立的电视机。房间的装修（主站样式）不会改变电视机的操作界面，电视机的声音也不会轻易干扰房间的其他活动，两者通过遥控器（`postMessage`）进行清晰、可控的交互。这是一种追求**稳定性、安全性和功能完备性**的工程设计。
+
+
+
+# solidjs JSX 父子组件，父组件如何获取自足见內 dom 节点引用
+
+使用 refs，参考：
+
+- 转发 refs：https://solid.yayujs.com/concepts/refs#%E8%BD%AC%E5%8F%91-refs
+- Forwarding refs：https://docs.solidjs.com/concepts/refs#forwarding-refs
 
 
 # 附录

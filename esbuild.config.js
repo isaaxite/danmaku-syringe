@@ -6,6 +6,32 @@ const postcss = require('postcss');
 const tailwindcss = require('@tailwindcss/postcss');
 const autoprefixer = require('autoprefixer');
 
+const { parseStringPromise } = require('xml2js');
+
+function getPackageJsonObject() {
+  const text = fs.readFileSync("./package.json", "utf-8");
+  return JSON.parse(text);
+}
+
+function getTempermonkeyUserScriptHeader() {
+  const pkgData = getPackageJsonObject();
+  const lines = [
+    '// ==UserScript==',
+    `// @name ${pkgData.name}`,
+    '// @namespace http://tampermonkey.net/',
+    `// @version ${pkgData.version}`,
+    `// @description ${pkgData.description}`,
+    `// @author ${pkgData.author}`,
+    '// @match https://ntdm8.com/play/*.html',
+    '// @match https://danmu.yhdmjx.com/m3u8.php?*',
+    '// @icon https://www.google.com/s2/favicons?sz=64&domain=github.io',
+    '// @grant none',
+    '// ==/UserScript=='
+  ];
+
+  return lines.join('\n');
+}
+
 const isProduction = process.env.NODE_ENV !== 'development';
 
 const cssInlinePlugin = {
@@ -39,6 +65,23 @@ const cssInlinePlugin = {
   },
 };
 
+const xml2jsonPlugin = {
+  name: 'xml-to-json',
+  setup(build) {
+    build.onLoad({ filter: /\.xml$/ }, async (args) => {
+      const xmlText = await fs.promises.readFile(args.path, 'utf8');
+    
+
+      const jsonData = parseStringPromise(xmlText);
+
+      // 将 CSS 转换为 JS,在运行时注入到 head
+      return {
+        contents: jsonData,
+        loader: 'js',
+      };
+    });
+  },
+};
 
 const opt = {
   entryPoints: ['./index.jsx'],
@@ -47,10 +90,15 @@ const opt = {
   plugins: [
     solidPlugin(),
     cssInlinePlugin,
+    // xml2jsonPlugin,
   ],
   loader: {
     '.js': 'jsx',
     '.jsx': 'jsx',
+    '.xml': 'text',
+  },
+  banner: {
+    js: getTempermonkeyUserScriptHeader()
   },
   minify: isProduction,
   sourcemap: !isProduction,
@@ -62,6 +110,7 @@ const opt = {
 // build(opt);
 
 (async function main() {
+
   const ctx = await context(opt);
   const { hosts, port } = await ctx.serve({
     servedir: './'
