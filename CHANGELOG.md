@@ -416,6 +416,133 @@ const cssInlinePlugin = {
 - Forwarding refs：https://docs.solidjs.com/concepts/refs#forwarding-refs
 
 
+# 弹幕 API
+
+## bilibili
+
+单次获取完整弹幕。
+
+### 请求
+
+```shell
+GET https://api.bilibili.com/x/v1/dm/list.so?oid={oid}
+```
+
+### 响应
+
+响应的数据结构分为 xml 和 json 两种。
+
+#### xml
+
+数据包结构如下，其中弹幕的核心信息在 `<d>` 的 `p` 属性。
+
+```xml
+<i>
+	<chatserver>chat.bilibili.com</chatserver>
+	<chatid>35514027057</chatid>
+	<mission>0</mission>
+	<maxlimit>3000</maxlimit>
+	<state>0</state>
+	<real_name>0</real_name>
+	<source>k-v</source>
+	<d p="695.79200,1,25,16777215,1768967938,0,38e4be46,2029009147471297280,10">？时间道祖出手了是吧</d>
+	<d p="129.81700,1,25,16777215,1768964234,0,d43a8a84,2028978073919204096,10">所谓丰城第一武徒，说到底不过是个淬体期</d>
+	<d p="177.60400,1,25,16777215,1768963033,0,a9f32ef4,2028967994545773056,10">进度有点慢了，一点剧情不费劲，要我说，擂台比武别结束了，一直打下去得了。</d>
+</i>
+```
+
+`p` 属性包含的信息如下：
+
+```shell
+{time},{mode},{fontSize},{color},{timestamp},{pool},{senderHash},{danmakuId},{rowId}
+```
+
+- time：时间（秒）；
+- mode：模式（1普通，4底部，5顶部）；
+- fontSize：字体大小；
+- color：颜色（十进制）；
+- timestamp：发送时间戳；
+- pool：弹幕池；
+- senderHash：发送者哈希；
+- danmakuId：弹幕ID；
+- rowId：行ID。
+
+#### json
+
+## 腾讯视频
+
+分段（时间段，每 30s 一批）获取弹幕。
+
+### 请求
+
+```shell
+GET https://dm.video.qq.com/barrage/segment/{vid}/t/v1/{start_ms}/{end_ms}
+```
+
+- vid: 网页链接中可得，https://v.qq.com/x/cover/mzc00200n53vkqc/{vid}.html
+- start_ms / end_ms：单位是毫秒，开始、结束时间相差 30s（30000ms）
+
+### 响应
+
+格式： JSON
+
+```json
+{
+  "barrage_list":[
+    {
+      "id":"76561198730097937",
+      "is_op":0,
+      "head_url":"",
+      "time_offset":"0",
+      "up_count":"41",
+      "bubble_head":"",
+      "bubble_level":"",
+      "bubble_id":"",
+      "rick_type":0,
+      "content_style":"",
+      "user_vip_degree":0,
+      "create_time":"1751089213",
+      "content":"恭迎叶天帝",
+      "hot_type":0,
+      "gift_info":null,
+      "share_item":null,
+      "vuid":"",
+      "nick":"",
+      "data_key":"id=76561198730097937",
+      "content_score":53.502857,
+      "show_weight":0,
+      "track_type":0,
+      "show_like_type":0,
+      "report_like_score":0,
+      "relate_sku_info":[]
+    }
+  ]
+}
+```
+
+
+# 监听 video 时间变动，动态拉取腾讯视频弹幕
+
+腾讯视频是分批拉取弹幕，按视频时间，每 30s 获取一次弹幕。
+
+1. 尝试监听 video 的 progress 事件，获取当前视频时间判断是否获取新的弹幕。
+2. 获取 video 的视频总时长，用于判断是否停止请求获取弹幕。或可使用 loadedmetadata 事件
+   1. loadedmetadata事件的回调中的 this.duration 可得到时长（单位 s）
+
+timeupdate 事件的 this 中包含 currentTime 和 duration
+
+# 临时增加 axios 获取腾讯弹幕
+
+
+# 批量更新弹幕尝试
+
+1. o 按批次增加弹幕容器和示例；
+2. x 基于 1 的前提下，在下次在增加批次后销毁上一批次；
+3. x 使用 dmIns.emit 更新新增批次弹幕。部分有效，但丢失大部分新弹幕。这个问题可能和下面提到的 bug 有关；
+4. x 仅使用 1 个 danmaku 实例，利用引用类型特点。通过数组 push 方式增加 comments 参数的数据。
+
+发现一个弹幕丢失 bug：若有多条相同 time 的弹幕可能仅仅渲染 1 条
+
 # 附录
 
 - [esbuild 中文文档](https://esbuild.org.cn)
