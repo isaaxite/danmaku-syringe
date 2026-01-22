@@ -39,7 +39,7 @@ export function xmlDanmakuToJson(xmlString) {
     if (attrParts.length >= 9) {
       const danmaku = {
         // 弹幕属性
-        time: parseFloat(attrParts[0]),      // 时间（秒）
+        time: parseFloat(attrParts[0]),      // 时间（秒）时间（秒）
         mode: parseInt(attrParts[1]),        // 模式：1普通，4底部，5顶部
         fontSize: parseInt(attrParts[2]),    // 字体大小
         color: parseInt(attrParts[3]),       // 颜色（十进制）
@@ -72,4 +72,8 @@ export function xmlDanmakuToJson(xmlString) {
     count: danmakuList.length,
     source: 'xml'
   };
+}
+
+export function isFunction(prop) {
+  return Object.prototype.toString.call(prop) === '[object Function]';
 }

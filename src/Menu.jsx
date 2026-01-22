@@ -1,5 +1,4 @@
 import { createSignal, onMount } from "solid-js"
-import "./styles/menu.css"
 import Danmaku from "danmaku";
 import VideoContainer from "./VideoContainer";
 import { render } from "solid-js/web";
@@ -9,6 +8,12 @@ import axios from "axios";
 const btnDefClassList = "block w-full text-white px-3 py-2 rounded-sm";
 const btnActClassList = "bg-blue-500 hover:bg-blue-700 cursor-pointer";
 // const btnDisableClassList = "bg-blue-300";
+const SINGLE_DANMAKU_STYLE = {
+  fontSize: '24px',
+  color: '#ffffff',
+  lineHeight: '36px',
+  textShadow: '-1px -1px #000, -1px 1px #000, 1px -1px #000, 1px 1px #000'
+};
 
 function plusRandomMS(originTimeSec, msRange) {
   let time = Number.parseInt(originTimeSec);
@@ -17,13 +22,9 @@ function plusRandomMS(originTimeSec, msRange) {
   return time;
 }
 
-async function requestVqqDanmaku(vid, startMS, endMS) {
-  const style = {
-    fontSize: '24px',
-    color: '#ffffff',
-    lineHeight: '36px',
-    textShadow: '-1px -1px #000, -1px 1px #000, 1px -1px #000, 1px 1px #000'
-  };
+async function requestVqqDanmaku(vid, batch) {
+  const startMS = batch * 30000;
+  const endMS = startMS + 30000;
 
   // const batchData = vqqDanmakuMockData[`${startMS}-${endMS}`];
   // if (batchData) {
@@ -33,31 +34,25 @@ async function requestVqqDanmaku(vid, startMS, endMS) {
   //       // text: `${startMS / 1000}-${endMS / 1000}|${fixTime}: ${text}`,
   //       text,
   //       time: plusRandomMS(fixTime, 1000),
-  //       style
+  //       style: SINGLE_DANMAKU_STYLE
   //     };
   //   });
   // }
 
   const { data } = await axios.get(`https://dm.video.qq.com/barrage/segment/${vid}/t/v1/${startMS}/${endMS}`);
 
-
-  const dmData = [];
-  for (let i = 0; i < data.barrage_list.length; i++) {
-    const item = data.barrage_list[i];
+  const dmData = data.barrage_list.map(item => {
     let time = Number.parseInt(item.time_offset / 1000);
-
     time = plusRandomMS(time, 100);
-
-    dmData.push({
+    return {
       text: item.content,
       time,
-      style,
-    });
-  }
+      style: SINGLE_DANMAKU_STYLE,
+    };
+  });
 
   return dmData;
 }
-
 
 function appendDanmakuContainerTo(vcontainerRef, cnt) {
   const danmakuContainerID = `danmaku-migrate_danmaku-reander-container-${cnt}`;
@@ -75,73 +70,69 @@ const Menu = () => {
   const [getNewVideoRef, setNewVideoRef] = createSignal(null);
   const [getDanmakuPoolRef] = createSignal([]);
 
+  const batchRenderDanmakuPool = async (batch) => {
+    const MAX_POOL_NUM = 2;
+    const dmData = await requestVqqDanmaku('p410184b5jy', batch);
+    const danmakuPool = getDanmakuPoolRef();
+
+    if (danmakuPool.length < MAX_POOL_NUM) {
+      const newDanmakuContainerRef = appendDanmakuContainerTo(getVcontainerRef(), batch);
+      const newDmIns = new Danmaku({
+        container: newDanmakuContainerRef,
+        media: getNewVideoRef(),
+        comments: dmData,
+      });
+      danmakuPool.push([newDmIns, newDanmakuContainerRef]);
+      return;
+    }
+
+    let oldDanmakuPoolItem = danmakuPool[0];
+    danmakuPool[0] = danmakuPool[1];
+    oldDanmakuPoolItem[0].destroy();
+    oldDanmakuPoolItem[1].innerHTML = '';
+    danmakuPool[1] = [
+      new Danmaku({
+        container: oldDanmakuPoolItem[1],
+        media: getNewVideoRef(),
+        comments: dmData,
+      }),
+      oldDanmakuPoolItem[1],
+    ];
+    oldDanmakuPoolItem = null;
+  };
+
+  const queryOriginVideoEle = () => {
+    return document.querySelector('video');
+  };
+
   const insertVideoContainer = () => {
-    const danmakuContainerID = 'danmaku-migrate_danmaku-reander-container';
-    let vcontainerRef;
-
-    const updateDanmaku = async (curCnt) => {
-      const startMS = curCnt * 30000;
-      const endMS = startMS + 30000;
-      const dmData = await requestVqqDanmaku('p410184b5jy', startMS, endMS);
-      const danmakuPool = getDanmakuPoolRef();
-
-      if (danmakuPool.length < 2) {
-        const newDanmakuContainerRef = appendDanmakuContainerTo(vcontainerRef, curCnt);
-        const newDmIns = new Danmaku({
-          container: newDanmakuContainerRef,
-          media: getNewVideoRef(),
-          comments: dmData,
-        });
-        danmakuPool.push([newDmIns, newDanmakuContainerRef]);
-        return;
-      }
-
-      let oldDanmakuPoolItem = danmakuPool[0];
-      danmakuPool[0] = danmakuPool[1];
-      oldDanmakuPoolItem[0].destroy();
-      oldDanmakuPoolItem[1].innerHTML = '';
-      danmakuPool[1] = [
-        new Danmaku({
-          container: oldDanmakuPoolItem[1],
-          media: getNewVideoRef(),
-          comments: dmData,
-        }),
-        oldDanmakuPoolItem[1],
-      ];
-      oldDanmakuPoolItem = null;
-    };
-
-    const vcontainerID = 'danmaku-migrate_video-container';
-    vcontainerRef = document.createElement('DIV');
-    vcontainerRef.setAttribute('id', vcontainerID);
+    const vcontainerRef = document.createElement('DIV');
+    vcontainerRef.setAttribute('id', 'danmaku-migrate_video-container');
     vcontainerRef.classList = "absolute top-0 left-0 size-full z-10";
     document.body.appendChild(vcontainerRef);
-
     setVcontainerRef(vcontainerRef);
 
-    const originVideo = document.querySelector('video');
+    const originVideo = queryOriginVideoEle();
     const src = originVideo.getAttribute('src');
     originVideo.src = undefined;
 
-    render(() => <VideoContainer ref={setNewVideoRef} src={src} />, vcontainerRef);
-
-    setTimeout(() => {
-      updateDanmaku(0);
+    render(() => <VideoContainer onMount={() => {
+      batchRenderDanmakuPool(0);
       getNewVideoRef().addEventListener('timeupdate', function() {
         const UNIT = 30;
         const currentTime = Number.parseInt(this.currentTime);
         const cnt = Number.parseInt(currentTime / UNIT);
         if (cnt !== getCnt()) {
-          updateDanmaku(cnt);
+          batchRenderDanmakuPool(cnt);
           setCnt(cnt);
         }
       });
-    });
+    }} ref={setNewVideoRef} src={src} />, vcontainerRef);
   };
 
   const handleFullscreenChange = () => {
     setTimeout(() => {
-      for (let [dmIns] of getDanmakuPoolRef()) {
+      for (const [dmIns] of getDanmakuPoolRef()) {
         dmIns.resize();
       }
     }, 200);
@@ -156,16 +147,13 @@ const Menu = () => {
   };
 
   onMount(() => {
-    document.body.style = "font-size: 16px;";
     // 监听各种全屏事件
-    const fullscreenEvents = [
+    [
       'fullscreenchange',
       'webkitfullscreenchange',
       'mozfullscreenchange',
       'MSFullscreenChange'
-    ];
-    
-    fullscreenEvents.forEach(eventName => {
+    ].forEach(eventName => {
       document.addEventListener(eventName, handleFullscreenChange, false);
     });
   });
