@@ -83,21 +83,32 @@ const Menu = () => {
       const startMS = curCnt * 30000;
       const endMS = startMS + 30000;
       const dmData = await requestVqqDanmaku('p410184b5jy', startMS, endMS);
-
-      const newDanmakuContainerRef = appendDanmakuContainerTo(vcontainerRef, curCnt);
-      const newDmIns = new Danmaku({
-        container: newDanmakuContainerRef,
-        media: getNewVideoRef(),
-        comments: dmData,
-      });
-
       const danmakuPool = getDanmakuPoolRef();
-      if (danmakuPool.length >= 2) {
-        const [oldDmIns, oldDanmakuContainerRef] = danmakuPool.shift();
-        oldDmIns.destroy();
-        oldDanmakuContainerRef.remove();
+
+      if (danmakuPool.length < 2) {
+        const newDanmakuContainerRef = appendDanmakuContainerTo(vcontainerRef, curCnt);
+        const newDmIns = new Danmaku({
+          container: newDanmakuContainerRef,
+          media: getNewVideoRef(),
+          comments: dmData,
+        });
+        danmakuPool.push([newDmIns, newDanmakuContainerRef]);
+        return;
       }
-      danmakuPool.push([newDmIns, newDanmakuContainerRef]);
+
+      let oldDanmakuPoolItem = danmakuPool[0];
+      danmakuPool[0] = danmakuPool[1];
+      oldDanmakuPoolItem[0].destroy();
+      oldDanmakuPoolItem[1].innerHTML = '';
+      danmakuPool[1] = [
+        new Danmaku({
+          container: oldDanmakuPoolItem[1],
+          media: getNewVideoRef(),
+          comments: dmData,
+        }),
+        oldDanmakuPoolItem[1],
+      ];
+      oldDanmakuPoolItem = null;
     };
 
     const vcontainerID = 'danmaku-migrate_video-container';
