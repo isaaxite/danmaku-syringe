@@ -565,6 +565,16 @@ timeupdate 事件的 this 中包含 currentTime 和 duration
   └───────────────────鼠标再次移动───────────┘
 ```
 
+# 监听视窗变化，调整弹幕区域
+
+TODO
+
+# 原网站样式污染 tailwindcss 样式
+
+- [ ] 删除原网站样式；
+- [ ] 增加 tailwindcss 的优先级
+
+
 # 附录
 
 - [esbuild 中文文档](https://esbuild.org.cn)

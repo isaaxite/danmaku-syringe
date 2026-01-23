@@ -69,6 +69,7 @@ const Menu = () => {
   const [getCnt, setCnt] = createSignal(0);
   const [getNewVideoRef, setNewVideoRef] = createSignal(null);
   const [getDanmakuPoolRef] = createSignal([]);
+  const [getZenCursorTimer, setZenCursorTimer] = createSignal(0);
 
   const batchRenderDanmakuPool = async (batch) => {
     const MAX_POOL_NUM = 2;
@@ -130,12 +131,45 @@ const Menu = () => {
     }} ref={setNewVideoRef} src={src} />, vcontainerRef);
   };
 
+  const zenCursorMousemoveHandler = () => {
+    getZenCursorTimer() && clearTimeout(getZenCursorTimer());
+
+    if (!getZenCursorTimer() && getVcontainerRef().style.cssText.includes('cursor: none')) {
+      console.info('recover cursor')
+      getVcontainerRef().style = "cursor: auto;";
+    }
+
+    if (!document.fullscreenElement) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      if (getNewVideoRef().paused) {
+        console.info('video pause, so do not hide cursor')
+        return;
+      }
+      console.info('cursor hide');
+      getVcontainerRef().style = "cursor: none !important;";
+      setZenCursorTimer(0);
+    }, 2000);
+    setZenCursorTimer(timer);
+  };
+
   const handleFullscreenChange = () => {
+    console.info(document.fullscreenElement)
     setTimeout(() => {
       for (const [dmIns] of getDanmakuPoolRef()) {
         dmIns.resize();
       }
     }, 200);
+
+    if (document.fullscreenElement) {
+      document.addEventListener('mousemove', zenCursorMousemoveHandler);
+    } else {
+      document.removeEventListener('mousemove', zenCursorMousemoveHandler);
+      getVcontainerRef().style = "cursor: auto;";
+      console.info('removeEventListener zenCursor');
+    }
   };
 
   const toggleFullscreen = () => {

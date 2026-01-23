@@ -77,3 +77,28 @@ export function xmlDanmakuToJson(xmlString) {
 export function isFunction(prop) {
   return Object.prototype.toString.call(prop) === '[object Function]';
 }
+
+
+export class ZenCursor {
+  constructor(props) {
+    // 隐藏鼠标指针在指定元素区域內生效
+    this.containerRef = props.containerRef;
+    // this.
+  }
+
+  init() {
+
+  }
+
+  start() {
+
+  }
+
+  stop() {
+
+  }
+
+  destroy() {
+
+  }
+}
