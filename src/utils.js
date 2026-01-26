@@ -1,3 +1,10 @@
+function decimalToHexColor(decimalColor) {
+  // 确保是整数
+  const hex = decimalColor.toString(16).toUpperCase();
+  // 补零到6位
+  return '#' + '0'.repeat(6 - hex.length) + hex;
+}
+
 /**
  * 将 XML 弹幕数据转换为 JSON 格式
  * @param {string} xmlString - XML 格式的弹幕数据字符串
@@ -42,7 +49,7 @@ export function xmlDanmakuToJson(xmlString) {
         time: parseFloat(attrParts[0]),      // 时间（秒）时间（秒）
         mode: parseInt(attrParts[1]),        // 模式：1普通，4底部，5顶部
         fontSize: parseInt(attrParts[2]),    // 字体大小
-        color: parseInt(attrParts[3]),       // 颜色（十进制）
+        color: decimalToHexColor(parseInt(attrParts[3])),       // 颜色（十进制）
         timestamp: parseInt(attrParts[4]),   // 发送时间戳
         pool: parseInt(attrParts[5]),        // 弹幕池
         senderHash: attrParts[6],            // 发送者哈希

@@ -3,7 +3,9 @@ import Danmaku from "danmaku";
 import VideoContainer from "./VideoContainer";
 import { render } from "solid-js/web";
 import axios from "axios";
+import { xmlDanmakuToJson } from "./utils";
 // import vqqDanmakuMockData from "../test/asset/vetm_dm.mock.json";
+import bilibiliDMData from '../test/asset/dm.xml';
 
 const btnDefClassList = "block w-full text-white px-3 py-2 rounded-sm";
 const btnActClassList = "bg-blue-500 hover:bg-blue-700 cursor-pointer";
@@ -13,6 +15,10 @@ const SINGLE_DANMAKU_STYLE = {
   color: '#ffffff',
   lineHeight: '36px',
   textShadow: '-1px -1px #000, -1px 1px #000, 1px -1px #000, 1px 1px #000'
+};
+const Vtypes = {
+  VQQ: 'vqq',
+  BILIBILI: 'bilibili',
 };
 
 function plusRandomMS(originTimeSec, msRange) {
@@ -54,11 +60,49 @@ async function requestVqqDanmaku(vid, batch) {
   return dmData;
 }
 
+async function requestBilibliDnamaku(oid, batch) {
+  const startMS = batch * 30000;
+  const endMS = startMS + 30000;
+  const bilibiliDMJSON = xmlDanmakuToJson(bilibiliDMData);
+
+  const retData = [];
+  for (const item of bilibiliDMJSON.danmaku) {
+    const itemMS = item.time * 1000;
+    if (startMS <= itemMS && itemMS < endMS) {
+      retData.push({
+        text: item.content,
+        time: item.time,
+        style: {
+          ...SINGLE_DANMAKU_STYLE,
+          color: item.color,
+          fontSize: `${item.fontSize}px`,
+        }
+      });
+    }
+  }
+
+  return retData;
+  const { data } = await axios.get('https://api.bilibili.com/x/v1/dm/list.so', {
+    params: { oid },
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      'Referer': 'https://www.bilibili.com',
+      'Origin': 'https://www.bilibili.com',
+      'Accept': '*/*',
+      'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8'
+    }
+  });
+
+  console.info(data)
+  const ret = xmlDanmakuToJson(data)
+  console.info(ret);
+}
+
 function appendDanmakuContainerTo(vcontainerRef, cnt) {
   const danmakuContainerID = `danmaku-migrate_danmaku-reander-container-${cnt}`;
   const newDanmakuContainerRef = document.createElement('DIV');
   newDanmakuContainerRef.setAttribute('id', danmakuContainerID);
-  newDanmakuContainerRef.classList = 'absolute top-20 bottom-20 left-0 w-full z-20';
+  newDanmakuContainerRef.classList = 'absolute top-20 bottom-20 left-0 w-full z-1000';
   newDanmakuContainerRef.style = "pointer-events: none;";
   vcontainerRef.appendChild(newDanmakuContainerRef);
   return newDanmakuContainerRef;
@@ -70,11 +114,18 @@ const Menu = () => {
   const [getNewVideoRef, setNewVideoRef] = createSignal(null);
   const [getDanmakuPoolRef] = createSignal([]);
   const [getZenCursorTimer, setZenCursorTimer] = createSignal(0);
+  const [getVtype, setVtype] = createSignal(Vtypes.VQQ);
+  const [getVideoId, setVideoId] = createSignal('35354313629');
 
   const batchRenderDanmakuPool = async (batch) => {
     const MAX_POOL_NUM = 2;
-    const dmData = await requestVqqDanmaku('p410184b5jy', batch);
+    const dmData = getVtype() === Vtypes.VQQ
+      ? await requestVqqDanmaku(getVideoId(), batch)
+      : await requestBilibliDnamaku(getVideoId(), batch);
     const danmakuPool = getDanmakuPoolRef();
+
+    // console.info(dmData)
+    // return;
 
     if (danmakuPool.length < MAX_POOL_NUM) {
       const newDanmakuContainerRef = appendDanmakuContainerTo(getVcontainerRef(), batch);
@@ -109,7 +160,7 @@ const Menu = () => {
   const insertVideoContainer = () => {
     const vcontainerRef = document.createElement('DIV');
     vcontainerRef.setAttribute('id', 'danmaku-migrate_video-container');
-    vcontainerRef.classList = "absolute top-0 left-0 size-full z-10";
+    vcontainerRef.classList = "absolute top-0 left-0 size-full z-1000";
     document.body.appendChild(vcontainerRef);
     setVcontainerRef(vcontainerRef);
 
@@ -156,7 +207,6 @@ const Menu = () => {
   };
 
   const handleFullscreenChange = () => {
-    console.info(document.fullscreenElement)
     setTimeout(() => {
       for (const [dmIns] of getDanmakuPoolRef()) {
         dmIns.resize();
@@ -194,7 +244,16 @@ const Menu = () => {
 
   return (
     <ul className="absolute top-60 right-2 bg-slate-50 px-2 py-3 shadow-md">
-      <li><button className={`${btnDefClassList} mt-2 ${btnActClassList}`} onClick={insertVideoContainer}>替换视频容器</button></li>
+      <li>
+        <button className={`${btnDefClassList} mt-2 ${btnActClassList}`} onClick={insertVideoContainer}>替换视频容器</button>
+      </li>
+      <li>
+        <select name="vtype" id="cars" onChange={(e) => setVtype(e.target.value)}>
+          <option value="vqq">腾讯视频</option>
+          <option value="bilibili">Bilibili</option>
+        </select>
+        <input type="text" value={getVideoId()} placeholder={getVtype() === Vtypes.VQQ ? 'vid' : 'oid'} id="video-id_input" onInput={(e) => setVideoId(e.target.value)} />
+      </li>
       <li><button className={`${btnDefClassList} mt-2 ${btnActClassList}`} onClick={toggleFullscreen}>全屏</button></li>
     </ul>
   );

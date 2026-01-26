@@ -565,6 +565,11 @@ timeupdate 事件的 this 中包含 currentTime 和 duration
   └───────────────────鼠标再次移动───────────┘
 ```
 
+快速实现
+
+fullscreenchange 事件监听全屏动作, 在它的回调內根据 document.fullscreenElement 判断当前是否全屏. 全屏则监听 mousemove 事件,不是在移除 mousemove 事件. mousemove 事件回调內, 使用定时器(防抖逻辑)设置静默, 静默后移动指针解除静默是利用 `style.cssText.includes('cursor: none')`
+
+
 # 监听视窗变化，调整弹幕区域
 
 TODO
@@ -574,6 +579,22 @@ TODO
 - [ ] 删除原网站样式；
 - [ ] 增加 tailwindcss 的优先级
 
+# 双击切换全屏
+
+默认是 video 而不是 div (video 的父容器)切换.
+
+
+# 菜单添加 input 输入视频相关id(vqq:vid, bilibili: oid)
+
+## 解决 B 站 API 的跨域请求问题
+
+- [ ] node 本地服务转发请求
+- [ ] 上传本地弹幕
+
+# 增加入口
+
+  - Entry.jsx 用于决定弹幕-视频容器的创建方式
+  - DanmakuMigrate.jsx 以替身方式创建的弹幕-视频容器
 
 # 附录
 

@@ -1,13 +1,14 @@
 import { onMount } from "solid-js";
 import "./style.css"
-import Menu from "./Menu";
+import Entry from "./Entry";
+// import Menu from "./Menu";
 
 const App = () => {
   onMount(() => {
     document.body.style = "font-size: 16px;";
   });
 
-  return (<Menu />);
+  return (<Entry />);
 };
 
 export default App;

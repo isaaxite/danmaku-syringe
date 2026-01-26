@@ -23,6 +23,8 @@ function getTempermonkeyUserScriptHeader() {
     `// @description ${pkgData.description}`,
     `// @author ${pkgData.author}`,
     '// @match https://danmu.yhdmjx.com/m3u8.php?*',
+    '// @match https://player.cycanime.com/?*',
+    '// @match https://art.v2player.top:8989/player/?*',
     '// @icon https://www.google.com/s2/favicons?sz=64&domain=github.io',
     '// @grant none',
     '// ==/UserScript=='
