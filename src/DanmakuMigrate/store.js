@@ -13,9 +13,11 @@ export const BilibiliDanmakuGetterType = {
 
 export const [store, setStore] = createStore({
   timeCount: -1,
-  danmakuSource: DanmakuSource.Bilibili,
+  danmakuSource: DanmakuSource.Vqq,
   bilibiliDanmakuGetterType: BilibiliDanmakuGetterType.UploadFile,
   danmakuData: null,
+  videoId: '',  // for api, not html element attribute
+  // videoId: 'j4101ouc4ve',
 });
 
 export const onTimeupdate = (cb) => {

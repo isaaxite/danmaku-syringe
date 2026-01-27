@@ -5,6 +5,7 @@ import { store, setStore, DanmakuSource, BilibiliDanmakuGetterType } from "./sto
 import { DanmakuOperateType } from "../constant";
 import { InlineButton } from "../Component/Button";
 import { DropdownMenu } from "../Component/Select";
+import { TextInput } from "../Component/Input";
 
 const CollapseType = {
   none: 'none',
@@ -48,7 +49,7 @@ const RadioList = (props) => {
 };
 
 const Controlbar = (props) => {
-  const [getCollapseType, setCollapseType] = createSignal(CollapseType.none);
+  const [getCollapseType, setCollapseType] = createSignal(CollapseType.DanmakuConf);
 
   const handleBilibiliDanmakuXmlSelect = (event) => {
     const file = event.target.files[0];
@@ -79,7 +80,7 @@ const Controlbar = (props) => {
       <Show when={getCollapseType() === CollapseType.DanmakuConf}>
         <div className="bg-slate-300 px-3 py-5 text-left">
           <DropdownMenu
-            selected={DanmakuSource.Bilibili}
+            selected={store.danmakuSource}
             options={[
               { text: '腾讯视频', value: DanmakuSource.Vqq },
               { text: 'Bilibili', value: DanmakuSource.Bilibili },
@@ -90,7 +91,11 @@ const Controlbar = (props) => {
           <Switch>
             <Match when={store.danmakuSource === DanmakuSource.Vqq}>
               <div>
-                vid: <input type="text" />
+                <TextInput
+                  label={'Vid:'}
+                  value={store.videoId}
+                  onChange={(videoId) => setStore('videoId', videoId)}
+                />
               </div>
             </Match>
             <Match when={store.danmakuSource === DanmakuSource.Bilibili}>

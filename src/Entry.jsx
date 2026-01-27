@@ -18,9 +18,9 @@ const ContainerType = {
 
 const Entry = () => {
   const [getDisplayState, setDisplayState] = createSignal(DisplayState.Expand);
-  const [getContainerType, setContainerType] = createSignal(ContainerType.Thereal);
+  const [getContainerType, setContainerType] = createSignal(ContainerType.Substitute);
   const [getOriginVideoSrc, setOriginVideoSrc] = createSignal('');
-  const [getTherealRootPath, setTherealRootPath] = createSignal('#video-container');
+  const [getTherealRootPath, setTherealRootPath] = createSignal('');
   const [isHideVideoContainer, setIsHideVideoContainer] = createSignal(false);
 
   const queryOriginVideoSrc = () => {

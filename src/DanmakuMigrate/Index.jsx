@@ -1,10 +1,11 @@
-import { createSignal, onMount } from "solid-js";
+import { createSignal } from "solid-js";
 import Controlbar from "./Controlbar"
 import { BilibiliDanmakuGetterType, DanmakuSource, onDanmakuDataUpdate, setStore, store } from "./store";
 import Danmaku from "danmaku";
 import { generateRandomString } from "../utils";
 import { DanmakuOperateType } from "../constant";
 import { InlineButton } from "../Component/Button";
+import { requestVqqBatchDanmaku } from "./request";
 
 const MAX_POOL_NUM = 2;
 const VIDEO_TIME_SLOT_UNIT = 30;  // SECOND
@@ -26,10 +27,9 @@ function appendDanmakuWraperTo(parentRef) {
 };
 
 const DanmakuMigrate = (props) => {
+  // const getRootRef = () => props.rootRef;
   const getVideoRef = () => props.videoRef;
-  const getRootRef = () => props.rootRef;
   const [getContainerRef, setContainerRef] = createSignal(null);
-  const [getDanmakuWraperRef] = createSignal([]);
   const [getDanmakuPoolRef] = createSignal([]);
   const getPropClassName = () => props.className;
 
@@ -51,25 +51,17 @@ const DanmakuMigrate = (props) => {
     return retData;
   };
 
-  const batchRenderDanmakuPool = async (batch) => {
-    const dmData = getBatchDanmakuData(batch);
+  const batchRenderDanmakuPool = async (dmData) => {
     const danmakuPool = getDanmakuPoolRef();
     const media = getVideoRef();
-
-    console.info(`batchRenderDanmakuPool batch=${batch}`, dmData)
-
     if (danmakuPool.length < MAX_POOL_NUM) {
       const newDanmakuContainerRef = appendDanmakuWraperTo(getContainerRef());
-      console.info(newDanmakuContainerRef);
-
-      setTimeout(() => {
-        const newDmIns = new Danmaku({
+      const newDmIns = new Danmaku({
         container: newDanmakuContainerRef,
         media,
         comments: dmData,
       });
       danmakuPool.push([newDmIns, newDanmakuContainerRef]);
-      }, 1000);
       return;
     }
 
@@ -88,21 +80,15 @@ const DanmakuMigrate = (props) => {
     oldDanmakuPoolItem = null;
   };
 
-  const videoTimeupdateHandler = () => {
-    const currentTime = Number.parseInt(this.currentTime);
-    const cnt = Number.parseInt(currentTime / VIDEO_TIME_SLOT_UNIT);
-    if (cnt !== store.timeCount) {
-      // batchRenderDanmakuPool(cnt);
-      setStore('timeCount', store.timeCount + 1);
-    }
-  }
-
-  const addVideoTimeupdateEventListener = () => {
-    getVideoRef().addEventListener('timeupdate', videoTimeupdateHandler)
-  };
-
-  const removeVideoTimeupdateEventListener = () => {
-    getVideoRef().removeEventListener('timeupdate', videoTimeupdateHandler)
+  const onVideoTimeupdate = (cb) => {
+    getVideoRef().addEventListener('timeupdate', function() {
+      const currentTime = Number.parseInt(this.currentTime);
+      const cnt = Number.parseInt(currentTime / VIDEO_TIME_SLOT_UNIT);
+      if (cnt !== store.timeCount) {
+        cb(cnt);
+        setStore('timeCount', store.timeCount + 1);
+      }
+    })
   };
 
   const injectBilibliUpliadDanmaku = () => {
@@ -118,6 +104,24 @@ const DanmakuMigrate = (props) => {
     });
     danmakuPool.push([danmakuRef, newDanmakuWraperRef]);
   }
+
+  const consumeBilibiliDanmaku = () => {
+    switch (store.bilibiliDanmakuGetterType) {
+      case BilibiliDanmakuGetterType.UploadFile:
+        injectBilibliUpliadDanmaku();
+        break;
+      default:
+        console.warn(`Unexcept BilibiliDanmakuGetterType, current is ${store.bilibiliDanmakuGetterType}`);
+    }
+  };
+
+  const consumeVqqDanmaku = () => {
+    console.info('consumeVqqDanmaku invoked!', store.videoId);
+    onVideoTimeupdate(async (batch) => {
+      const dmData = await requestVqqBatchDanmaku(store.videoId, batch);
+      batchRenderDanmakuPool(dmData);
+    });
+  };
 
   onDanmakuDataUpdate(() => {
     console.info('onDanmakuDataUpdate invoked!');
@@ -141,12 +145,16 @@ const DanmakuMigrate = (props) => {
     <div id="danmaku-migrate_container" ref={setContainerRef} className={`absolute top-0 bottom-0 left-0 w-full z-1001 overflow-hidden ${getPropClassName()}`} style="pointer-events: none;">
       <Controlbar
         onConsumeDanmaku={() => {
-          if (store.danmakuSource === DanmakuSource.Bilibili && store.bilibiliDanmakuGetterType === BilibiliDanmakuGetterType.UploadFile) {
-            injectBilibliUpliadDanmaku();
-            return;
+          switch (store.danmakuSource) {
+            case DanmakuSource.Bilibili:
+              consumeBilibiliDanmaku();
+              break;
+            case DanmakuSource.Vqq:
+              consumeVqqDanmaku();
+              break;
+            default:
+              console.warn(`Unexcept DanmakuSource Type, current is ${store.danmakuSource}`);
           }
-
-          addVideoTimeupdateEventListener();
         }}
         onDanmakuOperateBtn={(type) => {
           const danmakuPool = getDanmakuPoolRef();
