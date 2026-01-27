@@ -85,6 +85,38 @@ export function isFunction(prop) {
   return Object.prototype.toString.call(prop) === '[object Function]';
 }
 
+/**
+ * 生成指定长度的随机字符串
+ * @param {number} length - 字符串长度
+ * @param {string} charset - 可选，字符集
+ * @returns {string} 随机字符串
+ */
+export function generateRandomString(length = 8, charset = '') {
+  // 默认字符集：大小写字母 + 数字
+  const defaultCharset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  
+  // 使用传入的字符集或默认字符集
+  const chars = charset || defaultCharset;
+  let result = '';
+  
+  // 验证参数
+  if (typeof length !== 'number' || length <= 0) {
+    throw new Error('长度必须为正整数');
+  }
+  
+  if (typeof chars !== 'string' || chars.length === 0) {
+    throw new Error('字符集不能为空');
+  }
+  
+  // 生成随机字符串
+  const charsLength = chars.length;
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * charsLength);
+    result += chars[randomIndex];
+  }
+  
+  return result;
+}
 
 export class ZenCursor {
   constructor(props) {
