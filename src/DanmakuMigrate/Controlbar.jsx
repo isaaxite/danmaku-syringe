@@ -49,7 +49,7 @@ const RadioList = (props) => {
 };
 
 const Controlbar = (props) => {
-  const [getCollapseType, setCollapseType] = createSignal(CollapseType.DanmakuConf);
+  const [getCollapseType, setCollapseType] = createSignal(CollapseType.none);
 
   const handleBilibiliDanmakuXmlSelect = (event) => {
     const file = event.target.files[0];
@@ -75,6 +75,9 @@ const Controlbar = (props) => {
         <InlineButton onClick={() => props.onConsumeDanmaku()}>消费弹幕</InlineButton>
 
         <InlineButton onClick={() => props.onDanmakuOperateBtn(DanmakuOperateType.Resize)}>重置弹幕池尺寸</InlineButton>
+
+        <InlineButton onClick={() => props.onFullscreenBtn()}>全屏</InlineButton>
+
         {props.children}
       </div>
       <Show when={getCollapseType() === CollapseType.DanmakuConf}>

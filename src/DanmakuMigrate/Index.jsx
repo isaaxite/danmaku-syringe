@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js";
+import { createSignal, onMount } from "solid-js";
 import Controlbar from "./Controlbar"
 import { BilibiliDanmakuGetterType, DanmakuSource, onDanmakuDataUpdate, setStore, store } from "./store";
 import Danmaku from "danmaku";
@@ -27,11 +27,12 @@ function appendDanmakuWraperTo(parentRef) {
 };
 
 const DanmakuMigrate = (props) => {
-  // const getRootRef = () => props.rootRef;
+  const getRootRef = () => props.rootRef;
   const getVideoRef = () => props.videoRef;
+  const getPropClassName = () => props.className;
   const [getContainerRef, setContainerRef] = createSignal(null);
   const [getDanmakuPoolRef] = createSignal([]);
-  const getPropClassName = () => props.className;
+  const [getZenCursorTimer, setZenCursorTimer] = createSignal(0);
 
   const getUploadedDanmakuData = () => {
     const retData = [];
@@ -78,6 +79,14 @@ const DanmakuMigrate = (props) => {
       oldDanmakuPoolItem[1],
     ];
     oldDanmakuPoolItem = null;
+  };
+
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      getRootRef().requestFullscreen();
+    }
   };
 
   const onVideoTimeupdate = (cb) => {
@@ -141,6 +150,59 @@ const DanmakuMigrate = (props) => {
     // oldDanmakuPoolItem = null;
   });
 
+  const zenCursorMousemoveHandler = () => {
+    getZenCursorTimer() && clearTimeout(getZenCursorTimer());
+
+    if (!getZenCursorTimer() && getRootRef().style.cssText.includes('cursor: none')) {
+      console.info('recover cursor')
+      getRootRef().style = "cursor: auto;";
+    }
+
+    if (!document.fullscreenElement) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      if (getVideoRef().paused) {
+        console.info('video pause, so do not hide cursor')
+        return;
+      }
+      console.info('cursor hide');
+      getRootRef().style = "cursor: none !important;";
+      setZenCursorTimer(0);
+    }, 1000);
+    setZenCursorTimer(timer);
+  };
+
+  const handleFullscreenChange = () => {
+    setTimeout(() => {
+      for (const [dmIns] of getDanmakuPoolRef()) {
+        dmIns.resize();
+      }
+    }, 200);
+
+    if (document.fullscreenElement) {
+      document.addEventListener('mousemove', zenCursorMousemoveHandler);
+    } else {
+      clearTimeout(getZenCursorTimer());
+      document.removeEventListener('mousemove', zenCursorMousemoveHandler);
+      getRootRef().style = "cursor: auto;";
+      console.info('removeEventListener zenCursor');
+    }
+  };
+
+  onMount(() => {
+    // 监听各种全屏事件
+    [
+      'fullscreenchange',
+      'webkitfullscreenchange',
+      'mozfullscreenchange',
+      'MSFullscreenChange'
+    ].forEach(eventName => {
+      document.addEventListener(eventName, handleFullscreenChange, false);
+    });
+  });
+
   return (
     <div id="danmaku-migrate_container" ref={setContainerRef} className={`absolute top-0 bottom-0 left-0 w-full z-1001 overflow-hidden ${getPropClassName()}`} style="pointer-events: none;">
       <Controlbar
@@ -172,6 +234,7 @@ const DanmakuMigrate = (props) => {
               console.warn(`Unexcept DanmakuOperateType, current is ${type}`);
           }
         }}
+        onFullscreenBtn={toggleFullscreen}
       ><InlineButton onClick={() => props.onCollapseBtn()}>收起</InlineButton></Controlbar>
     </div>
   );
