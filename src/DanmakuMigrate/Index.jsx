@@ -33,6 +33,7 @@ const DanmakuMigrate = (props) => {
   const [getContainerRef, setContainerRef] = createSignal(null);
   const [getDanmakuPoolRef] = createSignal([]);
   const [getZenCursorTimer, setZenCursorTimer] = createSignal(0);
+  const [controlbarIsInvisible, setControlbarIsInvisible] = createSignal(false)
 
   const getUploadedDanmakuData = () => {
     const retData = [];
@@ -201,11 +202,20 @@ const DanmakuMigrate = (props) => {
     ].forEach(eventName => {
       document.addEventListener(eventName, handleFullscreenChange, false);
     });
+
+    getVideoRef().addEventListener('pause', () => {
+      setControlbarIsInvisible(false);
+    });
   });
 
   return (
-    <div id="danmaku-migrate_container" ref={setContainerRef} className={`absolute top-0 bottom-0 left-0 w-full z-1001 overflow-hidden ${getPropClassName()}`} style="pointer-events: none;">
+    <div  id="danmaku-migrate_container"
+      ref={setContainerRef}
+      className={`absolute top-0 bottom-0 left-0 w-full z-1001 overflow-hidden ${getPropClassName()}`}
+      style="pointer-events: none;"
+    >
       <Controlbar
+        className={controlbarIsInvisible() ? 'invisible' : ''}
         onConsumeDanmaku={() => {
           switch (store.danmakuSource) {
             case DanmakuSource.Bilibili:
@@ -235,7 +245,10 @@ const DanmakuMigrate = (props) => {
           }
         }}
         onFullscreenBtn={toggleFullscreen}
-      ><InlineButton onClick={() => props.onCollapseBtn()}>收起</InlineButton></Controlbar>
+      >
+        <InlineButton onClick={() => setControlbarIsInvisible(true)}>隐藏控制条</InlineButton>
+        <InlineButton onClick={() => props.onCollapseBtn()}>收起</InlineButton>
+      </Controlbar>
     </div>
   );
 };

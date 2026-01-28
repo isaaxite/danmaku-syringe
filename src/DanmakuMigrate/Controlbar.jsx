@@ -49,6 +49,7 @@ const RadioList = (props) => {
 };
 
 const Controlbar = (props) => {
+  const propsClassName = () => props.className;
   const [getCollapseType, setCollapseType] = createSignal(CollapseType.none);
 
   const handleBilibiliDanmakuXmlSelect = (event) => {
@@ -68,7 +69,7 @@ const Controlbar = (props) => {
   };
 
   return (
-    <div id="danmaku-migrate_controlbar" className="text-right alsolute top-0 left-0 z-1001" style="pointer-events: auto;">
+    <div id="danmaku-migrate_controlbar" className={`text-right alsolute top-0 left-0 z-1001 ${propsClassName()}`} style="pointer-events: auto;">
       <div className="bg-white inline-flex justify-end pb-2 px-1 rounded">
         <InlineButton onClick={() => setCollapseType(CollapseType.DanmakuConf)}>弹幕源配置</InlineButton>
 
