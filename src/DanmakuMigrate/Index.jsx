@@ -1,7 +1,7 @@
 import { createSignal, onMount } from "solid-js";
 import Controlbar from "./Controlbar"
 import { BilibiliDanmakuGetterType, DanmakuSource, onDanmakuDataUpdate, setStore, store } from "./store";
-import Danmaku from "danmaku";
+import Danmaku from "danmaku/dist/esm/danmaku.dom.js";
 import { generateRandomString } from "../utils";
 import { DanmakuOperateType } from "../constant";
 import { InlineButton } from "../Component/Button";

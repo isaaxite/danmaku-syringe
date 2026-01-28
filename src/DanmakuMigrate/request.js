@@ -1,4 +1,3 @@
-import axios from "axios";
 import { SINGLE_DANMAKU_STYLE } from "../constant";
 // import vqqDmJsonData from "../../test/asset/vqq_dm.mock.json";
 
@@ -34,7 +33,9 @@ export async function requestVqqBatchDanmaku(vid, batch) {
   const startMS = batch * 30000;
   const endMS = startMS + 30000;
 
-  let { data } = await axios.get(`https://dm.video.qq.com/barrage/segment/${vid}/t/v1/${startMS}/${endMS}`);
+  let data = await fetch(`https://dm.video.qq.com/barrage/segment/${vid}/t/v1/${startMS}/${endMS}`)
+    .then(response => response.json())
+    .catch(error => console.error('请求失败:', error));
 
   let dmData = deduplicateVqqDanmaku(data.barrage_list);
   data = null;
