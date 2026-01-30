@@ -1,17 +1,20 @@
-const { context } = require("esbuild");
-const { solidPlugin } = require("esbuild-plugin-solid");
-
 const fs = require('fs');
+const { context, build } = require("esbuild");
+const { solidPlugin } = require("esbuild-plugin-solid");
 const postcss = require('postcss');
 const tailwindcss = require('@tailwindcss/postcss');
 const autoprefixer = require('autoprefixer');
-
-const { parseStringPromise } = require('xml2js');
 
 function getPackageJsonObject() {
   const text = fs.readFileSync("./package.json", "utf-8");
   return JSON.parse(text);
 }
+
+const DEF_MATCH_LIST = [
+  'https://danmu.yhdmjx.com/m3u8.php?*',
+  'https://player.cycanime.com/?*',
+  'https://art.v2player.top:8989/player/?*'
+];
 
 function getTempermonkeyUserScriptHeader() {
   const pkgData = getPackageJsonObject();
@@ -22,9 +25,7 @@ function getTempermonkeyUserScriptHeader() {
     `// @version ${pkgData.version}`,
     `// @description ${pkgData.description}`,
     `// @author ${pkgData.author}`,
-    '// @match https://danmu.yhdmjx.com/m3u8.php?*',
-    '// @match https://player.cycanime.com/?*',
-    '// @match https://art.v2player.top:8989/player/?*',
+    ...DEF_MATCH_LIST.map(it => `// @match ${it}`),
     '// @icon https://www.google.com/s2/favicons?sz=64&domain=github.io',
     '// @grant none',
     '// ==/UserScript=='
@@ -66,24 +67,6 @@ const cssInlinePlugin = {
   },
 };
 
-const xml2jsonPlugin = {
-  name: 'xml-to-json',
-  setup(build) {
-    build.onLoad({ filter: /\.xml$/ }, async (args) => {
-      const xmlText = await fs.promises.readFile(args.path, 'utf8');
-    
-
-      const jsonData = parseStringPromise(xmlText);
-
-      // 将 CSS 转换为 JS,在运行时注入到 head
-      return {
-        contents: jsonData,
-        loader: 'js',
-      };
-    });
-  },
-};
-
 const opt = {
   entryPoints: ['./index.jsx'],
   bundle: true,
@@ -91,7 +74,6 @@ const opt = {
   plugins: [
     solidPlugin(),
     cssInlinePlugin,
-    // xml2jsonPlugin,
   ],
   loader: {
     '.js': 'jsx',
@@ -108,9 +90,11 @@ const opt = {
   },
   conditions: [process.env.NODE_ENV],
 };
-// build(opt);
 
 (async function main() {
+  if (isProduction) {
+    return build(opt);
+  }
 
   const ctx = await context(opt);
   const { hosts, port } = await ctx.serve({
