@@ -72,6 +72,7 @@ const Entry = () => {
 
   const getTherealRootRef = () => {
     if (isAutoFindTherealRoot()) {
+      console.info('Auto find the thereal root.');
       return findHighestMatchingAncestor(getVideoRef());
     }
 

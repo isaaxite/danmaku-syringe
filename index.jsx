@@ -9,6 +9,4 @@ rootRef.setAttribute('id', rootID);
 rootRef.classList = "absolute top-0 left-0 w-full overflow-visible z-1001";
 document.body.appendChild(rootRef);
 
-setTimeout(() => {
-  render(App, rootRef);
-}, 100);
+render(App, rootRef);

@@ -67,10 +67,9 @@ const cssInlinePlugin = {
   },
 };
 
-const opt = {
+const defOpt = {
   entryPoints: ['./index.jsx'],
   bundle: true,
-  outfile: 'dist/index.js',
   plugins: [
     solidPlugin(),
     cssInlinePlugin,
@@ -93,12 +92,22 @@ const opt = {
 
 (async function main() {
   if (isProduction) {
-    return build(opt);
+    return build({
+      ...defOpt,
+      outdir: 'dist',
+    });
   }
 
-  const ctx = await context(opt);
+  const ctx = await context({
+    ...defOpt,
+    entryPoints: [
+      ...defOpt.entryPoints,
+      { out: 'byproduct', in: './dev/index.jsx' },
+    ],
+    outdir: 'dev/dist'
+  });
   const { hosts, port } = await ctx.serve({
-    servedir: './'
+    servedir: './dev'
   });
   console.info(`> http://localhost:${port}/`)
   await ctx.watch();

@@ -13,7 +13,7 @@ export const TextInput = (props) => {
   return (
     <>
       {props.label ? (
-        <label for={inputId}>{props.label}</label>
+        <label className="select-none" for={inputId}>{props.label}</label>
       ) : (<></>)}
       <input
         {...attrs}
@@ -29,6 +29,7 @@ export const TextInput = (props) => {
 
 export const Checkbox = (props) => {
   const inputId = props.id ? props.id : generateRandomString();
+  const checked = () => props.checked;
 
   return (
     <>
@@ -37,13 +38,13 @@ export const Checkbox = (props) => {
         id={inputId}
         type="checkbox"
         checked={props.checked}
-        onChange={function(e) {
-          props.onChange(this.checked)
+        onChange={function() {
+          props.onChange && props.onChange(this.checked);
         }}
       />
 
       {props.label ? (
-        <label className="text-xs leading-6 pl-1 mr-1 mt-2 cursor-pointer" for={inputId}>{props.label}</label>
+        <label className="select-none text-xs leading-6 pl-1 mr-1 mt-2 cursor-pointer" for={inputId}>{props.label}</label>
       ) : (<></>)}
     </>
   );
@@ -71,7 +72,7 @@ export const Upload = (props) => {
           const fileName = this.files[0]?.name || '未选择文件';
           setFilenameText(fileName);
 
-          props.onChange(this.files);
+          props.onChange && props.onChange(this.files);
         }}
       />
       <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
