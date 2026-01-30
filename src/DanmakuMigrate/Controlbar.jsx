@@ -1,23 +1,14 @@
 import { createSignal } from "solid-js";
-import { Switch, Show, Index, Match } from "solid-js/web";
+import { Switch, Index, Match } from "solid-js/web";
 import { xmlDanmakuToJson } from "../utils";
 import { store, setStore, DanmakuSource, BilibiliDanmakuGetterType } from "./store";
-import { DanmakuOperateType } from "../constant";
+import { CollapseType, DanmakuOperateType } from "../constant";
 import { InlineButton } from "../Component/Button";
 import { DropdownMenu } from "../Component/Select";
-import { TextInput } from "../Component/Input";
-
-const CollapseType = {
-  none: 'none',
-  DanmakuConf: 'danmakuConf',
-};
-
-const SINGLE_DANMAKU_STYLE = {
-  fontSize: '24px',
-  color: '#ffffff',
-  lineHeight: '36px',
-  textShadow: '-1px -1px #000, -1px 1px #000, 1px -1px #000, 1px 1px #000'
-};
+import { TextInput, Upload } from "../Component/Input";
+import { Textarea } from "../Component/Textarea";
+import { TopDrawer } from "../Component/Drawer";
+import { EntertFullscreenIcon } from "../Component/Svg";
 
 const RadioList = (props) => {
   const getListData = () => props.list;
@@ -50,10 +41,21 @@ const RadioList = (props) => {
 
 const Controlbar = (props) => {
   const propsClassName = () => props.className;
+  const danmakuOperationIsVisible = () => props.danmakuOperationIsVisible;
   const [getCollapseType, setCollapseType] = createSignal(CollapseType.none);
+  const [getXmlText, setXmlText] = createSignal('');
+  const [danmakuIsInvisible, setDanmakuIsInvisible] = createSignal(false);
 
-  const handleBilibiliDanmakuXmlSelect = (event) => {
-    const file = event.target.files[0];
+  const xml2jsonAndSetStore = () => {
+    if (!getXmlText()) {
+      return;
+    }
+    const jsonData = xmlDanmakuToJson(getXmlText());
+    setStore('danmakuData', jsonData);
+  };
+
+  const handleBilibiliDanmakuXmlSelect = (files) => {
+    const file = files[0];
     
     if (!file) {
       this.options.onError(new Error('未选择文件'));
@@ -62,27 +64,46 @@ const Controlbar = (props) => {
 
     const reader = new FileReader();
     reader.readAsText(file, 'UTF-8');
-    reader.onload = (event) => {
-      const jsonData = xmlDanmakuToJson(event.target.result);
-      setStore('danmakuData', jsonData);
-    };
+    reader.onload = (event) => setXmlText(event.target.result);
   };
 
   return (
-    <div id="danmaku-migrate_controlbar" className={`text-right alsolute top-0 left-0 z-1001 ${propsClassName()}`} style="pointer-events: auto;">
-      <div className="bg-white inline-flex justify-end pb-2 px-1 rounded">
+    <div id="danmaku-migrate_controlbar" className={`w-full bg-white text-right alsolute top-0 left-0 z-1001 ${propsClassName()}`} style="pointer-events: auto;">
+      <div className=" inline-flex justify-end pb-2 px-1 rounded">
         <InlineButton onClick={() => setCollapseType(CollapseType.DanmakuConf)}>弹幕源配置</InlineButton>
 
         <InlineButton onClick={() => props.onConsumeDanmaku()}>消费弹幕</InlineButton>
 
-        <InlineButton onClick={() => props.onDanmakuOperateBtn(DanmakuOperateType.Resize)}>重置弹幕池尺寸</InlineButton>
+        <Show when={danmakuOperationIsVisible()}>
+          <InlineButton onClick={() => props.onDanmakuOperateBtn(DanmakuOperateType.Resize)}>重置弹幕池尺寸</InlineButton>
 
-        <InlineButton onClick={() => props.onFullscreenBtn()}>全屏</InlineButton>
+          <Switch>
+            <Match when={danmakuIsInvisible()}>
+              <InlineButton onClick={() => {
+                setDanmakuIsInvisible(!danmakuIsInvisible());
+                props.onDanmakuOperateBtn(DanmakuOperateType.Show);
+              }}>显示弹幕</InlineButton>
+            </Match>
+            <Match when={!danmakuIsInvisible()}>
+              <InlineButton onClick={() => {
+                setDanmakuIsInvisible(!danmakuIsInvisible());
+                props.onDanmakuOperateBtn(DanmakuOperateType.Hide);
+              }}>隐藏弹幕</InlineButton>
+            </Match>
+          </Switch>
+        </Show>
+
+        <InlineButton onClick={() => props.onFullscreenBtn()}>
+          <EntertFullscreenIcon />
+        </InlineButton>
 
         {props.children}
       </div>
-      <Show when={getCollapseType() === CollapseType.DanmakuConf}>
-        <div className="bg-slate-300 px-3 py-5 text-left">
+      <TopDrawer
+        open={getCollapseType() === CollapseType.DanmakuConf}
+        onBackdropClick={() => setCollapseType(CollapseType.none)}
+      >
+        <div className="bg-white px-3 py-5 text-left">
           <DropdownMenu
             selected={store.danmakuSource}
             options={[
@@ -106,26 +127,24 @@ const Controlbar = (props) => {
               <RadioList
                 name="bilibi-danmaku_getter-type"
                 list={[
+                  { label: 'XML 文本', value: BilibiliDanmakuGetterType.XmlText },
                   { label: '上传文件', value: BilibiliDanmakuGetterType.UploadFile },
                   { label: '本地服务', value: BilibiliDanmakuGetterType.LocalServe },
                 ]}
-                defValue={BilibiliDanmakuGetterType.UploadFile}
+                defValue={store.bilibiliDanmakuGetterType}
                 onChange={(value) => setStore('bilibiliDanmakuGetterType', value)}
               />
 
               <Switch>
                 <Match when={store.bilibiliDanmakuGetterType === BilibiliDanmakuGetterType.UploadFile}>
-                  <label for="bilibili-danmaku-xml">选择要上传的文件</label>
-                  <input
-                    type="file"
-                    id="bilibili-danmaku-xml"
-                    accept=".xml"
-                    multiple={false}
-                    onChange={handleBilibiliDanmakuXmlSelect}
-                  />
+                  {/* <label for="bilibili-danmaku-xml">选择要上传的文件</label> */}
+                  <Upload onChange={handleBilibiliDanmakuXmlSelect} />
                 </Match>
                 <Match when={store.bilibiliDanmakuGetterType === BilibiliDanmakuGetterType.LocalServe}>
                   服务地址: <input type="text" />
+                </Match>
+                <Match when={store.bilibiliDanmakuGetterType === BilibiliDanmakuGetterType.XmlText}>
+                  <Textarea value={getXmlText()} onChange={setXmlText}/>
                 </Match>
               </Switch>
               <div></div>
@@ -133,11 +152,21 @@ const Controlbar = (props) => {
           </Switch>
 
           <InlineButton onClick={() => {
+            switch (store.danmakuSource) {
+              case DanmakuSource.Bilibili:
+                if (store.bilibiliDanmakuGetterType === BilibiliDanmakuGetterType.UploadFile || store.bilibiliDanmakuGetterType === BilibiliDanmakuGetterType.XmlText) {
+                  xml2jsonAndSetStore();
+                }
+                break;
+              default:
+
+            }
+
             setCollapseType(CollapseType.none);
             props.onConfirm && props.onConfirm();
           }}>确定</InlineButton>
         </div>
-      </Show>
+      </TopDrawer>
     </div>
   );
 };

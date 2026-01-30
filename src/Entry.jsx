@@ -4,6 +4,9 @@ import DanmakuMigrate from "./DanmakuMigrate/Index";
 import VideoContainer from "./VideoContainer";
 import { InlineButton } from "./Component/Button";
 import { DropdownMenu } from "./Component/Select";
+import { Checkbox, TextInput } from "./Component/Input";
+import { findHighestMatchingAncestor } from "./utils";
+import { ContainerType } from "./constant";
 
 const DisplayState = {
   Hide: 'hide',
@@ -11,20 +14,20 @@ const DisplayState = {
   Collapse: 'collapse'
 };
 
-const ContainerType = {
-  Substitute: 'substitute',
-  Thereal: 'thereal',
-};
-
 const Entry = () => {
   const [getDisplayState, setDisplayState] = createSignal(DisplayState.Expand);
-  const [getContainerType, setContainerType] = createSignal(ContainerType.Substitute);
+  const [getContainerType, setContainerType] = createSignal(ContainerType.Thereal);
   const [getOriginVideoSrc, setOriginVideoSrc] = createSignal('');
   const [getTherealRootPath, setTherealRootPath] = createSignal('');
   const [isHideVideoContainer, setIsHideVideoContainer] = createSignal(false);
+  const [isAutoFindTherealRoot, setIsAutoFindTherealRoot] = createSignal(true);
+
+  const getVideoRef = () => {
+    return document.querySelector('video');
+  }
 
   const queryOriginVideoSrc = () => {
-    const videoRef = document.querySelector('video');
+    const videoRef = getVideoRef();
 
     return videoRef ? videoRef.getAttribute('src') : '';
   };
@@ -54,6 +57,7 @@ const Entry = () => {
             src={getOriginVideoSrc()}
           />
           <DanmakuMigrate
+            containerType={ContainerType.Substitute}
             videoRef={getSubstituteVideoRef()}
             rootRef={rootRef}
             onCollapseBtn={() => {
@@ -66,19 +70,29 @@ const Entry = () => {
     }, rootRef);
   };
 
+  const getTherealRootRef = () => {
+    if (isAutoFindTherealRoot()) {
+      return findHighestMatchingAncestor(getVideoRef());
+    }
+
+    return document.querySelector(getTherealRootPath());
+  }
+
   const appendDanmakuContainer = () => {
-    const rootRef = document.querySelector(getTherealRootPath());
+    const rootRef = getTherealRootRef();
     if (!rootRef) {
       console.info(`Using ${getTherealRootPath()} can not find any html elements!`);
       return;
     }
 
-    const videoRef = document.querySelector('video');
+    const videoRef = getVideoRef();
     // const containerRef = document.createElement('DIV');
     // containerRef.setAttribute('id', 'danmaku-migrate_container');
     // containerRef.classList = 'absolute top-0 bottom-0 left-0 w-full z-1000';
     // rootRef.appendChild(containerRef);
-    render(() => (<DanmakuMigrate videoRef={videoRef} rootRef={rootRef} />), rootRef);
+    render(() => (
+      <DanmakuMigrate containerType={ContainerType.Thereal} videoRef={videoRef} rootRef={rootRef} />
+    ), rootRef);
 
     setDisplayState(DisplayState.Hide);
   };
@@ -112,7 +126,19 @@ const Entry = () => {
                   </Show>
                 </Match>
                 <Match when={getContainerType() === ContainerType.Thereal}>
-                  <input type="text" value={getTherealRootPath()} onChange={(e) => setTherealRootPath(e.target.value)} />
+                  <Checkbox
+                    label="自动寻找视频容器"
+                    checked={isAutoFindTherealRoot()}
+                    onChange={setIsAutoFindTherealRoot}
+                  />
+                  <Show when={!isAutoFindTherealRoot()}>
+                    <TextInput
+                      value={getTherealRootPath()}
+                      onChange={(value) => setTherealRootPath(value)}
+                      placeholder="视频容器 querySelector 路径"
+                      className="w-42"
+                    />
+                  </Show>
                   <InlineButton onClick={appendDanmakuContainer}>注入</InlineButton>
                 </Match>
               </Switch>

@@ -141,3 +141,30 @@ export class ZenCursor {
 
   }
 }
+
+export function findHighestMatchingAncestor(video) {
+  const videoRect = video.getBoundingClientRect();
+  let highestMatch = null;
+  
+  let current = video.parentElement;
+
+  while (current && current !== document.body) {
+    const rect = current.getBoundingClientRect();
+    
+    // 判断条件
+    const sizeMatch = 
+      Math.abs(rect.width - videoRect.width) < 1 &&
+      Math.abs(rect.height - videoRect.height) < 1;
+    
+    // const onlyChild = current.children.length === 1;
+    
+    // if (sizeMatch && onlyChild) {
+    if (sizeMatch) {
+      highestMatch = current; // 不断更新为更高层级的
+    }
+    
+    current = current.parentElement;
+  }
+  
+  return highestMatch; // 返回最高层级的匹配
+}

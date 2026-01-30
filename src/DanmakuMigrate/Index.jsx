@@ -3,9 +3,10 @@ import Controlbar from "./Controlbar"
 import { BilibiliDanmakuGetterType, DanmakuSource, onDanmakuDataUpdate, setStore, store } from "./store";
 import Danmaku from "danmaku/dist/esm/danmaku.dom.js";
 import { generateRandomString } from "../utils";
-import { DanmakuOperateType } from "../constant";
+import { ContainerType, DanmakuOperateType } from "../constant";
 import { InlineButton } from "../Component/Button";
 import { requestVqqBatchDanmaku } from "./request";
+import { CollapseIcon } from "../Component/Svg";
 
 const MAX_POOL_NUM = 2;
 const VIDEO_TIME_SLOT_UNIT = 30;  // SECOND
@@ -33,7 +34,16 @@ const DanmakuMigrate = (props) => {
   const [getContainerRef, setContainerRef] = createSignal(null);
   const [getDanmakuPoolRef] = createSignal([]);
   const [getZenCursorTimer, setZenCursorTimer] = createSignal(0);
-  const [controlbarIsInvisible, setControlbarIsInvisible] = createSignal(false)
+  const [controlbarIsInvisible, setControlbarIsInvisible] = createSignal(false);
+  const [danmakuOperateIsVisible, setDanmakuOperateIsVisible] = createSignal(false);
+
+  const danmakuInsInvoke = (cb) => {
+    for (const [dmIns] of getDanmakuPoolRef()) {
+      if (dmIns) {
+        cb(dmIns);
+      }
+    }
+  }
 
   const getUploadedDanmakuData = () => {
     const retData = [];
@@ -64,6 +74,7 @@ const DanmakuMigrate = (props) => {
         comments: dmData,
       });
       danmakuPool.push([newDmIns, newDanmakuContainerRef]);
+      setDanmakuOperateIsVisible(true);
       return;
     }
 
@@ -113,11 +124,13 @@ const DanmakuMigrate = (props) => {
       comments,
     });
     danmakuPool.push([danmakuRef, newDanmakuWraperRef]);
+    setDanmakuOperateIsVisible(true);
   }
 
   const consumeBilibiliDanmaku = () => {
     switch (store.bilibiliDanmakuGetterType) {
       case BilibiliDanmakuGetterType.UploadFile:
+      case BilibiliDanmakuGetterType.XmlText:
         injectBilibliUpliadDanmaku();
         break;
       default:
@@ -177,9 +190,7 @@ const DanmakuMigrate = (props) => {
 
   const handleFullscreenChange = () => {
     setTimeout(() => {
-      for (const [dmIns] of getDanmakuPoolRef()) {
-        dmIns.resize();
-      }
+      danmakuInsInvoke((ins) => ins.resize());
     }, 200);
 
     if (document.fullscreenElement) {
@@ -215,6 +226,7 @@ const DanmakuMigrate = (props) => {
       style="pointer-events: none;"
     >
       <Controlbar
+        danmakuOperationIsVisible={danmakuOperateIsVisible()}
         className={controlbarIsInvisible() ? 'invisible' : ''}
         onConsumeDanmaku={() => {
           switch (store.danmakuSource) {
@@ -240,6 +252,12 @@ const DanmakuMigrate = (props) => {
             case DanmakuOperateType.Resize:
               operateDanmaku((ins) => ins.resize());
               break;
+            case DanmakuOperateType.Hide:
+              danmakuInsInvoke((ins) => ins.hide());
+              break;
+            case DanmakuOperateType.Show:
+              danmakuInsInvoke((ins) => ins.show());
+              break;
             default:
               console.warn(`Unexcept DanmakuOperateType, current is ${type}`);
           }
@@ -247,7 +265,11 @@ const DanmakuMigrate = (props) => {
         onFullscreenBtn={toggleFullscreen}
       >
         <InlineButton onClick={() => setControlbarIsInvisible(true)}>隐藏控制条</InlineButton>
-        <InlineButton onClick={() => props.onCollapseBtn()}>收起</InlineButton>
+        {props.containerType === ContainerType.Substitute ? (
+          <InlineButton onClick={() => props.onCollapseBtn()}>
+            <CollapseIcon />
+          </InlineButton>
+        ) : <></>}
       </Controlbar>
     </div>
   );
