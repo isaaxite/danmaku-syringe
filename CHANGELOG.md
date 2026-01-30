@@ -605,7 +605,12 @@ TODO
 
 # bilibili 增加把xml文本粘贴到 teatarea
 
-完成
+目前 bilibili 的弹幕未能直接项目代码发请求获取，因为 CORS。
+
+但 api 可能被浏览器或其他第三方工具有效请求，得到 xml 文本。直接复制-粘贴更方便。
+
+- [x] 增加解析 xml 文本入口；
+- [x] 增加 textarea 组件
 
 # 使用真身容器的优化
 
@@ -618,9 +623,22 @@ a）优先使用代码去找 video 的祖先标签 A，A 符合以下条件：
 原有的 input 输入容器 querySelector 路径作为补充。
 
 
+# 样式的改进
+
+- [x] input:file
+- [x] input:checkbox
+- [ ] 
+
+
 # 增加入口翻遍测试
 
 - 组件
+
+
+# 生产配置与脚本
+
+- esbuild 的生产配置
+- packagejson 脚本
 
 
 # 附录
