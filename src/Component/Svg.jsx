@@ -1,3 +1,5 @@
+import { For, createSignal, createEffect, onMount } from 'solid-js';
+
 export const EntertFullscreenIcon = (props) => (
   <svg 
     class={`w-4 h-4 ${props.className}`}
@@ -36,3 +38,25 @@ export const CollapseIcon = (props) => {
     </svg>
   );
 }
+
+export const DanmakuToggleIcon = (props) => {
+  const active = () => props.active;
+
+  return (
+    <svg viewBox="0 0 24 24" class="w-6 h-6">
+      <g>
+        <rect x="3" y="3" width="18" height="18" rx="2" 
+          class={active() ? 'fill-blue-500' : 'fill-gray-300'} />
+        <g class={active() ? 'text-white' : 'text-gray-500'}>
+          <line x1="7" y1="9" x2="17" y2="9" stroke="currentColor" />
+          <line x1="7" y1="12" x2="15" y2="12" stroke="currentColor" />
+          <line x1="7" y1="15" x2="13" y2="15" stroke="currentColor" />
+        </g>
+        {!active() && (
+          <line x1="6" y1="18" x2="18" y2="6" 
+            class="stroke-white stroke-[3]" />
+        )}
+      </g>
+    </svg>
+  );
+};
