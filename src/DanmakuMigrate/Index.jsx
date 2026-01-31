@@ -104,10 +104,10 @@ const DanmakuMigrate = (props) => {
   const onVideoTimeupdate = (cb) => {
     getVideoRef().addEventListener('timeupdate', function() {
       const currentTime = Number.parseInt(this.currentTime);
-      const cnt = Number.parseInt(currentTime / VIDEO_TIME_SLOT_UNIT);
-      if (cnt !== store.timeCount) {
-        cb(cnt);
-        setStore('timeCount', store.timeCount + 1);
+      const curTimeCount = Number.parseInt(currentTime / VIDEO_TIME_SLOT_UNIT);
+      if (curTimeCount !== store.timeCount) {
+        cb(curTimeCount);
+        setStore('timeCount', curTimeCount);
       }
     })
   };
