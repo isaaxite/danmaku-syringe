@@ -1,21 +1,15 @@
 import { createSignal, onMount } from "solid-js";
 import Controlbar from "./Controlbar"
-import { BilibiliDanmakuGetterType, DanmakuSource, onDanmakuDataUpdate, setStore, store } from "./store";
+import { BilibiliDanmakuGetterType, DanmakuSource, setStore, store } from "./store";
 import Danmaku from "danmaku/dist/esm/danmaku.dom.js";
 import { generateRandomString } from "../utils";
-import { ContainerType, DanmakuOperateType } from "../constant";
+import { ContainerType, DanmakuOperateType, SINGLE_DANMAKU_STYLE } from "../constant";
 import { InlineButton } from "../Component/Button";
 import { requestVqqBatchDanmaku } from "./request";
 import { CollapseIcon } from "../Component/Svg";
 
 const MAX_POOL_NUM = 2;
 const VIDEO_TIME_SLOT_UNIT = 30;  // SECOND
-const SINGLE_DANMAKU_STYLE = {
-  fontSize: '24px',
-  color: '#ffffff',
-  lineHeight: '36px',
-  textShadow: '-1px -1px #000, -1px 1px #000, 1px -1px #000, 1px 1px #000'
-};
 
 function appendDanmakuWraperTo(parentRef) {
   const danmakuContainerID = `danmaku-migrate_danmaku-wraper-${generateRandomString()}`;
@@ -34,7 +28,7 @@ const DanmakuMigrate = (props) => {
   const [getContainerRef, setContainerRef] = createSignal(null);
   const [getDanmakuPoolRef] = createSignal([]);
   const [getZenCursorTimer, setZenCursorTimer] = createSignal(0);
-  const [controlbarIsInvisible, setControlbarIsInvisible] = createSignal(false);
+  // const [controlbarIsVisible, setControlbarIsVisible] = createSignal(true);
   const [danmakuOperateIsVisible, setDanmakuOperateIsVisible] = createSignal(false);
 
   const danmakuInsInvoke = (cb) => {
@@ -146,24 +140,6 @@ const DanmakuMigrate = (props) => {
     });
   };
 
-  onDanmakuDataUpdate(() => {
-    console.info('onDanmakuDataUpdate invoked!');
-
-    // let oldDanmakuPoolItem = danmakuPool[0];
-    // danmakuPool[0] = danmakuPool[1];
-    // oldDanmakuPoolItem[0].destroy();
-    // oldDanmakuPoolItem[1].innerHTML = '';
-    // danmakuPool[1] = [
-    //   new Danmaku({
-    //     container: oldDanmakuPoolItem[1],
-    //     media: getVideoRef(),
-    //     comments,
-    //   }),
-    //   oldDanmakuPoolItem[1],
-    // ];
-    // oldDanmakuPoolItem = null;
-  });
-
   const zenCursorMousemoveHandler = () => {
     getZenCursorTimer() && clearTimeout(getZenCursorTimer());
 
@@ -213,10 +189,6 @@ const DanmakuMigrate = (props) => {
     ].forEach(eventName => {
       document.addEventListener(eventName, handleFullscreenChange, false);
     });
-
-    getVideoRef().addEventListener('pause', () => {
-      setControlbarIsInvisible(false);
-    });
   });
 
   return (
@@ -226,8 +198,8 @@ const DanmakuMigrate = (props) => {
       style="pointer-events: none;"
     >
       <Controlbar
+        // visible={controlbarIsVisible()}
         danmakuOperationIsVisible={danmakuOperateIsVisible()}
-        className={controlbarIsInvisible() ? 'invisible' : ''}
         onConsumeDanmaku={() => {
           switch (store.danmakuSource) {
             case DanmakuSource.Bilibili:
@@ -264,7 +236,6 @@ const DanmakuMigrate = (props) => {
         }}
         onFullscreenBtn={toggleFullscreen}
       >
-        <InlineButton onClick={() => setControlbarIsInvisible(true)}>隐藏控制条</InlineButton>
         {props.containerType === ContainerType.Substitute ? (
           <InlineButton onClick={() => props.onCollapseBtn()}>
             <CollapseIcon />

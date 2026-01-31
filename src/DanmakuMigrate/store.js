@@ -1,4 +1,3 @@
-import { createEffect } from "solid-js";
 import { createStore } from "solid-js/store";
 
 export const DanmakuSource = {
@@ -21,19 +20,3 @@ export const [store, setStore] = createStore({
   // videoId: 'j4101ouc4ve',
 });
 
-export const onTimeupdate = (cb) => {
-  createEffect(() => {
-    cb(store.timeCount);
-  });
-}
-
-export const onDanmakuDataUpdate = (cb) => {
-  createEffect(() => {
-    if (!store.danmakuData) {
-      return;
-    }
-    cb(store.danmakuData);
-  });
-};
-
-// export default { store, setStore };

@@ -1,6 +1,12 @@
-import { createSignal, onCleanup, createEffect } from 'solid-js';
+import { createSignal, onCleanup, createEffect, splitProps } from 'solid-js';
 
 export const HoverBlock = (props) => {
+  const [local, other] = splitProps(props, [
+    'forceVisible',
+    'className',
+    'children',
+    'onMouseEnter',
+  ]);
   const [isHovered, setIsHovered] = createSignal(false);
   const [isVisible, setIsVisible] = createSignal(false);
   let hoverTimeout;
@@ -9,11 +15,13 @@ export const HoverBlock = (props) => {
     if (hoverTimeout) clearTimeout(hoverTimeout);
     setIsHovered(true);
     setIsVisible(true);
+
+    local.onMouseEnter && local.onMouseEnter();
   };
 
   const handleMouseLeave = () => {
     // 如果外部强制显示，不处理鼠标离开
-    if (props.forceVisible) return;
+    if (local.forceVisible) return;
     
     setIsHovered(false);
     setIsVisible(false);
@@ -21,7 +29,7 @@ export const HoverBlock = (props) => {
 
   // 监听外部强制显示属性的变化
   createEffect(() => {
-    if (props.forceVisible) {
+    if (local.forceVisible) {
       // 强制显示，清除所有状态
       if (hoverTimeout) clearTimeout(hoverTimeout);
       setIsVisible(true);
@@ -41,13 +49,14 @@ export const HoverBlock = (props) => {
     <div
       class={`
         transition-opacity duration-200
-        ${isVisible() || props.forceVisible ? 'opacity-100' : 'opacity-0'}
-        ${props.className || ''}
+        ${isVisible() || local.forceVisible ? 'opacity-100' : 'opacity-0'}
+        ${local.className || ''}
       `}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      {...other}
     >
-      {props.children}
+      {local.children}
     </div>
   );
 };
