@@ -652,6 +652,12 @@ a）优先使用代码去找 video 的祖先标签 A，A 符合以下条件：
 
 # wait: DanmakuMigrate 目录下的组件考虑使用上下文共享 state
 
+TODO
+
+# 增加 HoverBlock 组件
+
+主要用于顶部弹幕操作条，在播放（专注观影）时自动不可见，如 video 控制条般。
+
 # 附录
 
 - [esbuild 中文文档](https://esbuild.org.cn)

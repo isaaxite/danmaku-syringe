@@ -7,6 +7,7 @@ import TopDrawer from "./src/TopDrawer";
 import Input from "./src/Input";
 import Select from "./src/Select";
 import Textarea from "./src/Textarea";
+import HoverBlock from "./src/HoverBlock";
 
 const byproductRootRef = document.createElement('DIV');
 byproductRootRef.setAttribute('id', 'byproduct-root');
@@ -22,6 +23,7 @@ const App = (props) => (
       <Tab href="/select">/select</Tab>
       <Tab href="/textarea">/textarea</Tab>
       <Tab href="/top-drawer">/top-drawer</Tab>
+      <Tab href="/hover-block">/hover-block</Tab>
     </nav>
     {props.children}
   </>
@@ -33,6 +35,7 @@ render(
       <Route path="/icon" component={Icon} />
       <Route path="/button" component={Button} />
       <Route path="/top-drawer" component={TopDrawer} />
+      <Route path="/hover-block" component={HoverBlock} />
       <Route path="/input" component={Input} />
       <Route path="/select" component={Select} />
       <Route path="/textarea" component={Textarea} />
