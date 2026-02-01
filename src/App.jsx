@@ -5,7 +5,7 @@ import Entry from "./Entry";
 
 const App = () => {
   onMount(() => {
-    document.body.style = "font-size: 16px;";
+    document.documentElement.style = 'font-size: 16px;';
   });
 
   return (<Entry />);

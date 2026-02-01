@@ -658,6 +658,31 @@ TODO
 
 主要用于顶部弹幕操作条，在播放（专注观影）时自动不可见，如 video 控制条般。
 
+# bugfix: Controlbar 应用 HoverBlock
+
+配置弹幕源，弹出 Drawer，然后鼠标指针离开 HoverBlock 区域，HoverBlock 变不可见
+
+# 备用的正式项目名称
+
+- danmaku-injector
+- danmaku-bridge
+- danmaku-anywhere
+- danmaku-fusion
+- danmaku-syringe
+- danmaku-dispatch
+
+# CSS rem 尺寸污染
+
+挂载当前项目代码，会修改 document.body 的字号为 16px，目前出现对原网页样式的污染（主要是原视频网站的弹幕字体大小）
+
+----
+
+实际 rem 的大小与 html 的字号相关，不是 body。以下是有效的修改：
+
+```js
+document.documentElement.style = 'font-size: 16px;';
+```
+
 # 附录
 
 - [esbuild 中文文档](https://esbuild.org.cn)

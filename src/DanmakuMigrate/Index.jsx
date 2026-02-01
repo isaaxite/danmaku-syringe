@@ -213,16 +213,9 @@ const DanmakuMigrate = (props) => {
           }
         }}
         onDanmakuOperateBtn={(type) => {
-          const danmakuPool = getDanmakuPoolRef();
-          const operateDanmaku = (cb) => {
-            for (const [danmakuRef] of danmakuPool) {
-              cb(danmakuRef);
-            }
-          }
-
           switch (type) {
             case DanmakuOperateType.Resize:
-              operateDanmaku((ins) => ins.resize());
+              danmakuInsInvoke((ins) => ins.resize());
               break;
             case DanmakuOperateType.Hide:
               danmakuInsInvoke((ins) => ins.hide());

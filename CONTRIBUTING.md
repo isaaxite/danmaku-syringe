@@ -1,4 +1,11 @@
-Commit 规范
+
+
+# 项目构建
+
+- 开发（watch模式）： `npm run dev`，产物位于：`./dev/dist`；
+- 生产：`npm run build`，产物位于：`./dist`；
+
+# Commit 规范
 
 使用 Angular 规范。
 
