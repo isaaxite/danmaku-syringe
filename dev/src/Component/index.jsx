@@ -15,7 +15,7 @@ export const Page = (props) => {
 
 export const Block = (props) => {
   return (
-    <div className="mt-4 px-2">{props.children}</div>
+    <div className="mt-4 mx-2 overflow-hidden">{props.children}</div>
   );
 };
 

@@ -1,6 +1,7 @@
 import { onMount } from "solid-js";
 import "./style.css"
-import Entry from "./Entry";
+// import Entry from "./Entry";
+import EntryBar from "./EntryBar";
 // import Menu from "./Menu";
 
 const App = () => {
@@ -8,7 +9,7 @@ const App = () => {
     document.documentElement.style = 'font-size: 16px;';
   });
 
-  return (<Entry />);
+  return (<EntryBar />);
 };
 
 export default App;

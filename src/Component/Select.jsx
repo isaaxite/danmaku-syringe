@@ -1,4 +1,5 @@
 import { createSignal, Index } from "solid-js";
+import { PRIMARY_CLASSNAMES, PRIMARY_FONTSIZE } from "../constant";
 
 export const DropdownMenu = (props) => {
   const getOpts = () => props.options;
@@ -6,7 +7,7 @@ export const DropdownMenu = (props) => {
 
   return (
     <select
-      className="text-xs text-white bg-blue-500 cursor-pointer h-6 rounded px-2 mt-2 mx-1 hover:bg-blue-700"
+      className={`${PRIMARY_CLASSNAMES} cursor-pointer h-6 rounded px-2 mx-1`}
       onChange={(e) => {
         props.onChange && props.onChange(e.target.value);
         setSelected(e.target.value);
@@ -14,9 +15,9 @@ export const DropdownMenu = (props) => {
     >
 
       <Index each={getOpts()}>
-        {(item, index) => (
+        {(item) => (
           <option
-            className="text-xs cursor-pointer"
+            className={`${PRIMARY_FONTSIZE} cursor-pointer`}
             value={item().value}
             selected={selected() === item().value}
           >{item().text}</option>

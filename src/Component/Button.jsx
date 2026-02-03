@@ -1,4 +1,5 @@
 import { splitProps, createSignal } from "solid-js";
+import { PRIMARY_CLASSNAMES } from "../constant";
 
 export const InlineButton = (props) => {
   const [local, other] = splitProps(props, ['children']);
@@ -9,6 +10,29 @@ export const InlineButton = (props) => {
     <button {...other} className={`${btnDefClassList} mt-2 ${btnActClassList}`}>{local.children}</button>
   );
 }
+
+const ButtonFactory = (className) => (props) => {
+  const DEAULT_CLASSlIST = `${PRIMARY_CLASSNAMES} inline-block align-bottom cursor-pointer`;
+  const HOVER_CLASSlIST = 'hover:bg-amber-800';
+  const [local, other] = splitProps(props, [
+    'children',
+    'className',
+  ]);
+  return (
+    <button
+      {...other}
+      className={`
+        ${className}
+        ${DEAULT_CLASSlIST}
+        ${HOVER_CLASSlIST}
+        ${local.className || ''}
+      `}
+    >{local.children}</button>
+  );
+};
+
+export const Button = ButtonFactory('px-2 py-1 rounded-sm mx-1');
+export const IconBUtton = ButtonFactory('p-1 rounded-full');
 
 const PLACEMENT_CLASSNAME = {
   'bottom': {

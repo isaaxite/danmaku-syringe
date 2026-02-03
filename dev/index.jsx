@@ -9,6 +9,7 @@ import Select from "./src/Select";
 import Textarea from "./src/Textarea";
 import HoverBlock from "./src/HoverBlock";
 import TabPage from "./src/TabPage";
+import Home from "./src/Home";
 
 const byproductRootRef = document.createElement('DIV');
 byproductRootRef.setAttribute('id', 'byproduct-root');
@@ -34,6 +35,7 @@ const App = (props) => (
 render(
   () => (
     <HashRouter root={App}>
+      <Route path="/" component={Home} />
       <Route path="/icon" component={Icon} />
       <Route path="/button" component={Button} />
       <Route path="/top-drawer" component={TopDrawer} />

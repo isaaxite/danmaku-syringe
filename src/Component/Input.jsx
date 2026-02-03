@@ -17,7 +17,10 @@ export const TextInput = (props) => {
       ) : (<></>)}
       <input
         {...attrs}
-        className={`bg-white placeholder:text-xs mt-2 w-40 h-6 border rounded border-slate-300 hover:border-indigo-300 ${props.className ? props.className : ''}`}
+        className={`
+          bg-white placeholder:text-xs pl-1 w-40 h-6 border rounded border-amber-700 hover:border-amber-800 focus:outline-none
+          ${props.className || ''}
+        `}
         id={inputId}
         type="text"
         value={value()}
@@ -29,12 +32,11 @@ export const TextInput = (props) => {
 
 export const Checkbox = (props) => {
   const inputId = props.id ? props.id : generateRandomString();
-  const checked = () => props.checked;
 
   return (
     <>
       <input
-        className="h-6 ml-1 mt-2 cursor-pointer"
+        className={`h-6 ml-1 cursor-pointer align-bottom ${props.checkBoxClass || ''}`}
         id={inputId}
         type="checkbox"
         checked={props.checked}
@@ -44,7 +46,7 @@ export const Checkbox = (props) => {
       />
 
       {props.label ? (
-        <label className="select-none text-xs leading-6 pl-1 mr-1 mt-2 cursor-pointer" for={inputId}>{props.label}</label>
+        <label className={`align-bottom select-none text-xs leading-6 pl-1 mr-1 cursor-pointer ${props.labelClass || ''}`} for={inputId}>{props.label}</label>
       ) : (<></>)}
     </>
   );

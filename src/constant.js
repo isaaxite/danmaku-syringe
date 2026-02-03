@@ -20,3 +20,7 @@ export const CollapseType = {
   none: 'none',
   DanmakuConf: 'danmakuConf',
 };
+
+
+export const PRIMARY_FONTSIZE = 'text-xs';
+export const PRIMARY_CLASSNAMES = `bg-amber-700 hover:bg-amber-800 ${PRIMARY_FONTSIZE} text-white`;
