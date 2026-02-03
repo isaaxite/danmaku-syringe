@@ -22,8 +22,16 @@ export const EntryBarView = (props) => {
           className="absolute left-1 top-1"
           onClick={() => setIsExpanded(!isExpanded())}
         >
-          <DMWordsIcon class="size-4 absolute top-2.5 left-3 scale-200" />
-          <SyringeIcon class="size-8 translate-0.5" />
+          <DMWordsIcon class={`
+            size-4 absolute top-2.5 left-3 origin-center
+            transform-gpu transition-all duration-300
+            ${isExpanded() ? 'delay-150 scale-200' : 'delay-100 scale-100'}
+          `} />
+          <SyringeIcon class={`
+            size-8
+            transform-gpu transition-all origin-center delay-150 duration-350
+            ${isExpanded() ? '-translate-x-0.5 translate-y-0.5 skew-2' : 'skew-0 translate-x-0 translate-0'}
+          `} />
         </IconBUtton>
 
         <DropdownMenu
