@@ -66,7 +66,7 @@ export function TopDrawer(props) {
                    p-1.5 rounded-full
                    text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200
                    hover:bg-gray-100 dark:hover:bg-gray-700
-                   transition-colors duration-200"
+                   transition-colors duration-200 cursor-pointer"
             aria-label="关闭抽屉"
           >
             {/* 关闭图标 - X */}

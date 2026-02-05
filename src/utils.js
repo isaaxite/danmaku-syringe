@@ -1,3 +1,5 @@
+import { createMemo } from "solid-js";
+
 function decimalToHexColor(decimalColor) {
   // 确保是整数
   const hex = decimalColor.toString(16).toUpperCase();
@@ -167,4 +169,15 @@ export function findHighestMatchingAncestor(video) {
   }
   
   return highestMatch; // 返回最高层级的匹配
+}
+
+export function createRefValue(defValue) {
+  const getter = createMemo(() => [defValue]);
+
+  return [
+    () => getter()[0],
+    (value) => {
+      getter()[0] = value;
+    },
+  ];
 }

@@ -2,8 +2,9 @@ export const Textarea = (props) => {
   const value = () => props.value || '';
   return (
     <textarea
-      className="bg-white border rounded border-slate-300 hover:border-indigo-300" rows="5" cols="26"
+      className="focus:outline-none bg-slate-50 border rounded border-amber-700 hover:border-amber-800 p-1" rows="5" cols="26"
       value={value()}
+      placeholder={props.placeholder || ''}
       onChange={(e) => props.onChange(e.target.value)}
     ></textarea>
   );

@@ -683,6 +683,36 @@ TODO
 document.documentElement.style = 'font-size: 16px;';
 ```
 
+# timeupdate 事件可能存在重复监听
+
+需要检查
+
+# zencursor 逻辑应该放在 Danmakupool 组件內
+
+todo
+
+# controlbar 的显隐逻辑更新
+
+效仿 video 标签的显隐逻辑
+
+# controlbar 左侧添加 logo
+
+todo
+
+# dmFusionRender 迁移
+
+放到 `src/DanmakuFusion` 下，改名 `render.jsx`。以下是目标结构
+
+```shell
+src/DanmakuFuion
+  ├── Logic.js # 原 index.jsx 分离出的
+  ├── View.jsx  # 原 index.jsx 分离出的
+  ├── redner.jsx  # dmFusionRender.jsx
+  └── request.js
+
+  1 directory, 2 files
+```
+
 # 附录
 
 - [esbuild 中文文档](https://esbuild.org.cn)

@@ -9,13 +9,16 @@ const VariantType = {
 
 export const Page = (props) => {
   return (
-    <div className="mt-4 px-2"><hr />{props.children}</div>
+    <div className="mt-4 px-2 relative"><hr />{props.children}</div>
   );
 };
 
 export const Block = (props) => {
   return (
-    <div className="mt-4 mx-2 overflow-hidden">{props.children}</div>
+    <>
+      {props.title ? (<h1 className="relative top-1 mt-2 ml-2 text-2xl font-bold">{props.title}</h1>) : (<></>)}
+      <div className="mt-4 mx-2 overflow-hidden" ref={props.ref}>{props.children}</div>
+    </>
   );
 };
 
@@ -33,6 +36,7 @@ export const Tab = (props) => {
   return (
     <A
       {...other}
+      class="inline-block mt-2"
       classList={{
         "active": isActive(),
         "disabled": props.disabled,

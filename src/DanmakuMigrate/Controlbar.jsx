@@ -1,4 +1,4 @@
-import { createEffect, createSignal, splitProps } from "solid-js";
+import { createSignal, splitProps } from "solid-js";
 import { Switch, Index, Match } from "solid-js/web";
 import { xmlDanmakuToJson } from "../utils";
 import { store, setStore, DanmakuSource, BilibiliDanmakuGetterType } from "./store";
@@ -8,7 +8,7 @@ import { DropdownMenu } from "../Component/Select";
 import { TextInput, Upload } from "../Component/Input";
 import { Textarea } from "../Component/Textarea";
 import { TopDrawer } from "../Component/Drawer";
-import { EntertFullscreenIcon } from "../Component/Svg";
+import { ToggleFullscreenIcon } from "../Component/Svg";
 import { HoverBlock } from "../Component/HoverBlock";
 
 const RadioList = (props) => {
@@ -110,7 +110,7 @@ const Controlbar = (props) => {
           </Show>
 
           <InlineButton onClick={() => local.onFullscreenBtn()}>
-            <EntertFullscreenIcon />
+            <ToggleFullscreenIcon fullscreen={true} />
           </InlineButton>
 
           {local.children}

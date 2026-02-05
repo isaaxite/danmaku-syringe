@@ -1,6 +1,5 @@
 import { createSignal } from 'solid-js';
-import { InlineButton } from '../../src/Component/Button';
-import { CollapseIcon, DanmakuToggleIcon, EntertFullscreenIcon, ExittFullscreenIcon, SyringeIcon } from '../../src/Component/Svg';
+import { CollapseIcon, DanmakuToggleIcon, SyringeIcon, ToggleFullscreenIcon } from '../../src/Component/Svg';
 import { Block, InlineBlock, Page } from './Component';
 
 
@@ -11,8 +10,7 @@ export default () => {
   return (
     <Page>
       <button className="cursor-pointer" onClick={() => setIsExpanded(!isExpanded())}><CollapseIcon isExpanded={isExpanded()} /></button>
-      <InlineBlock><EntertFullscreenIcon /></InlineBlock>
-      <InlineBlock><ExittFullscreenIcon /></InlineBlock>
+      <InlineBlock><ToggleFullscreenIcon /></InlineBlock>
 
       <InlineBlock>
         <button className="cursor-pointer" onClick={() => setDnamakuIsActive(!dnamakuIsActive())}>

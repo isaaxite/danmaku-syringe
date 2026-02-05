@@ -1,5 +1,5 @@
 import { createSignal, Match, Show, Switch } from "solid-js";
-import { Button, IconBUtton } from "../Component/Button";
+import { Button, IconRadiusButton } from "../Component/Button";
 import { DropdownMenu } from "../Component/Select";
 import { DMWordsIcon, SyringeIcon } from "../Component/Svg";
 import { Checkbox, TextInput } from "../Component/Input";
@@ -18,7 +18,7 @@ export const EntryBarView = (props) => {
         ${isExpanded() ? 'translate-x-0' : 'translate-x-[calc(100%-3.1rem)]'}
       `}>
 
-        <IconBUtton
+        <IconRadiusButton
           className="absolute left-1 top-1"
           onClick={() => setIsExpanded(!isExpanded())}
         >
@@ -32,7 +32,7 @@ export const EntryBarView = (props) => {
             transform-gpu transition-all origin-center delay-150 duration-350
             ${isExpanded() ? '-translate-x-0.5 translate-y-0.5 skew-2' : 'skew-0 translate-x-0 translate-0'}
           `} />
-        </IconBUtton>
+        </IconRadiusButton>
 
         <DropdownMenu
           selected={containerType()}

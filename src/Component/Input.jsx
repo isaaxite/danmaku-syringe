@@ -18,7 +18,7 @@ export const TextInput = (props) => {
       <input
         {...attrs}
         className={`
-          bg-white placeholder:text-xs pl-1 w-40 h-6 border rounded border-amber-700 hover:border-amber-800 focus:outline-none
+          bg-slate-50 placeholder:text-xs pl-1 w-40 h-6 border rounded border-amber-700 hover:border-amber-800 focus:outline-none
           ${props.className || ''}
         `}
         id={inputId}
@@ -54,14 +54,15 @@ export const Checkbox = (props) => {
 
 export const Upload = (props) => {
   const [filenameText, setFilenameText] = createSignal('未选择文件')
+
   return (
     <label class="
       inline-flex items-center gap-3
       px-6 py-4
-      border-2 border-dashed border-gray-300
+      border-2 border-dashed border-amber-700
       rounded-xl
       bg-gray-50
-      hover:border-blue-400 hover:bg-blue-50
+      hover:border-amber-800 hover:bg-blue-50
       cursor-pointer
       transition-all duration-200
     ">
@@ -83,12 +84,41 @@ export const Upload = (props) => {
       </svg>
       
       <div>
-        <span class="text-blue-600 font-medium">点击上传</span>
+        <span class="select-none text-amber-700 font-medium">点击上传</span>
         {/* <span class="text-gray-500 ml-2">或拖拽文件到此处</span> */}
-        <p class="text-sm text-gray-400 mt-1">仅仅支持 XML 文件</p>
+        <p class="select-none text-sm text-gray-400 mt-1">仅仅支持 XML 文件</p>
       </div>
       
-      <span class="file-name ml-auto text-sm text-gray-600">{filenameText()}</span>
+      <span class="select-none file-name ml-auto text-sm text-gray-600">{filenameText()}</span>
     </label>
+  );
+};
+
+export const RadioList = (props) => {
+  const getListData = () => props.list;
+  const [getSelected, setSelected] = createSignal(props.defValue);
+  const onChangeHandler = (e) => {
+    setSelected(e.target.value);
+    props?.onChange(e.target.value);
+  };
+
+  return (
+    <div className={props.className || ''}>
+      <Index each={getListData()}>
+        {(item, index) => (
+          <div className="inline-block mx-2">
+            <input
+              name={props.name}
+              id={`${props.name}-${index}`}
+              type="radio" value={item().value}
+              checked={item().value === getSelected()}
+              onChange={onChangeHandler}
+              className="cursor-pointer"
+            />
+            <label for={`${props.name}-${index}`} className="cursor-pointer pl-1 select-none">{item().label}</label>
+          </div>
+        )}
+      </Index>
+    </div>
   );
 };

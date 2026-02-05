@@ -7,7 +7,7 @@ export const DropdownMenu = (props) => {
 
   return (
     <select
-      className={`${PRIMARY_CLASSNAMES} cursor-pointer h-6 rounded px-2 mx-1`}
+      className={`${PRIMARY_CLASSNAMES} cursor-pointer h-6 rounded pl-3 pr-2 mx-1`}
       onChange={(e) => {
         props.onChange && props.onChange(e.target.value);
         setSelected(e.target.value);
