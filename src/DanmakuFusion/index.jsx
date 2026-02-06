@@ -4,7 +4,21 @@ import { DanmakuPool } from "../DanmakuPool";
 import { createRefValue, xmlDanmakuToJson } from "../utils";
 import { DanmakuOperateType, DanmakuSource, FULLSCREEN_CHANGE_EVENTS, SINGLE_DANMAKU_STYLE, VIDEO_TIME_SLOT_UNIT } from "../constant";
 import { requestVqqBatchDanmaku } from "./request";
+import { IconRadiusButton } from "../Component/Button";
+import { CollapseIcon } from "../Component/Svg";
 
+/**
+ * 弹幕融合播放器组件 Props 类型
+ * @typedef {Object} DanmakuFusionProps
+ * 
+ * @property {HTMLDivElement} rootRef - 弹幕根容器引用（必需）
+ * @property {HTMLVideoElement} videoRef - 视频元素引用（必需）
+ * @property {Boolean} showCollapseBtn - 是否展示 Collapse Button（可选）
+ * @property {Function} onClickCollapseBtn - 点击 Collapse Button 时触发
+ * 
+ * 弹幕融合播放器组件
+ * @param {DanmakuFusionProps} props
+ */
 export const DanmakuFusion = (props) => {
   const [danmakuOperationEnable, setdanmakuOperationEnable] = createSignal(false);
   const [danmakuInsArr, setDanmakuInsArr] = createRefValue([]);
@@ -160,7 +174,14 @@ export const DanmakuFusion = (props) => {
         onClickApplyDanmakuSrc={applyDanmakuConf}
         onClickToggleFullscreen={toggleFullscreen}
         onClickDanmakuOperate={onClickDanmakuOperate}
-      />
+      >
+        {props.showCollapseBtn ? (
+          <IconRadiusButton className="ml-3 mr-2" onClick={() => {
+            props.videoRef.pause();
+            props.onClickCollapseBtn();
+          }}><CollapseIcon /></IconRadiusButton>
+        ) : (<></>)}
+      </ControlBar>
     </>
   );
 };

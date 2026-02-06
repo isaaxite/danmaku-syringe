@@ -65,7 +65,7 @@ export const EntryBarView = (props) => {
                   setInsertPath(value);
                 }}
                 placeholder="视频容器 querySelector 路径"
-                className="w-42 mx-1"
+                className="w-42 mx-1 align-bottom"
               />
             </Show>
 

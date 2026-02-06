@@ -1,9 +1,8 @@
 import { findHighestMatchingAncestor } from "../utils";
-import { substituteDanmakuFusionRender, therealDanmakuFusionRender } from "../dmFusionRender";
+import { substituteDanmakuFusionRender, therealDanmakuFusionRender } from "../DanmakuFusion/render";
 import { ContainerType } from "../constant";
 
 const getVideoRef = () => document.querySelector('video');
-const queryOriginVideoSrc = () => getVideoRef()?.getAttribute('src') || '';
 
 export const EntryBarLogic = () => {
 
@@ -42,12 +41,14 @@ export const EntryBarLogic = () => {
 
   const appendSubstituteRoot = () => {
     const ret = { isFail: true };
-    const videoSrc = queryOriginVideoSrc();
+    const videoRef = getVideoRef();
+    const videoSrc = videoRef.getAttribute('src');
     if (!videoSrc) {
       console.info('Can not find any video src!');
       return ret;
     }
 
+    videoRef.pause();
     substituteDanmakuFusionRender(videoSrc);
 
     ret.isFail = false;

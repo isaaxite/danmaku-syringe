@@ -120,6 +120,8 @@ export const ControlBar = (props) => {
           }}>
             <ToggleFullscreenIcon fullscreen={!isFullscreen()} class="size-6" />
           </PureButton>
+
+          {local.children}
         </div>
       </HoverBlock>
 

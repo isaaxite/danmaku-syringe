@@ -1,6 +1,7 @@
 import { createSignal } from 'solid-js';
 import { CollapseIcon, DanmakuToggleIcon, SyringeIcon, ToggleFullscreenIcon } from '../../src/Component/Svg';
 import { Block, InlineBlock, Page } from './Component';
+import { PureButton } from '../../src/Component/Button';
 
 
 export default () => {
@@ -9,7 +10,11 @@ export default () => {
 
   return (
     <Page>
-      <button className="cursor-pointer" onClick={() => setIsExpanded(!isExpanded())}><CollapseIcon isExpanded={isExpanded()} /></button>
+      <PureButton className="p-1 rounded-sm mx-1"
+        onClick={() => setIsExpanded(!isExpanded())}
+      >
+        <CollapseIcon isExpanded={isExpanded()} />
+      </PureButton>
       <InlineBlock><ToggleFullscreenIcon /></InlineBlock>
 
       <InlineBlock>

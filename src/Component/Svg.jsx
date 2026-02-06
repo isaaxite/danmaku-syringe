@@ -12,17 +12,8 @@ export const ToggleFullscreenIcon = (props) => {
 };
 
 export const CollapseIcon = (props) => {
-  const isExpanded = () => props.isExpanded;
-
   return (
-    <svg 
-      class={`w-4 h-4 transform transition-transform duration-200 ${isExpanded() ? 'rotate-180' : ''}`}
-      fill="none" 
-      stroke="currentColor" 
-      viewBox="0 0 24 24"
-    >
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7" />
-    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" height="16" width="16" {...props}><g fill="none" fill-rule="evenodd" stroke-width=".667"><path d="M16 0v16H0V0zM8.396 15.505l-.008.002-.047.023-.014.003-.009-.003-.047-.024q-.011-.002-.016.004l-.003.007-.011.285.003.013.007.009.069.05.01.002.008-.003.07-.049.007-.01.003-.012-.011-.285q-.003-.01-.011-.012m.176-.075-.01.001-.122.062-.007.007-.002.007.012.287.004.008.005.005.134.062q.012.003.02-.006l.002-.009-.023-.41q-.003-.011-.013-.014m-.477.001a.02.02 0 0 0-.018.004l-.004.01-.022.409q0 .012.011.016l.01-.001.134-.062.007-.006.002-.007.012-.287-.002-.008-.007-.006z"/><path fill="#FFF" d="M8 3a1 1 0 0 1 .707.293l3.333 3.334a1 1 0 0 1-1.413 1.413L8 5.415 5.373 8.04A1 1 0 0 1 3.96 6.627l3.333-3.334A1 1 0 0 1 8 3m0 4a1 1 0 0 1 .707.293l3.333 3.334a1 1 0 0 1-1.413 1.413L8 9.415 5.373 12.04a1 1 0 0 1-1.413-1.414l3.333-3.334A1 1 0 0 1 8 7"/></g></svg>
   );
 }
 

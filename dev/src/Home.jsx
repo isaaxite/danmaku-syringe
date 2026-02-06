@@ -23,6 +23,9 @@ export default () => {
         count: count(),
         refCount: refCount(),
       })}>打印数据</Button>
+      <Button onClick={() => {
+        window.open()
+      }}>test</Button>
       {/* <Block>
         <DanmakuPool
           rootRef={document.querySelector('#video-container')}
