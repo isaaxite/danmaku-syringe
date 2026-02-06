@@ -21,11 +21,11 @@ import { CollapseIcon } from "../Component/Svg";
  */
 export const DanmakuFusion = (props) => {
   const [danmakuOperationEnable, setdanmakuOperationEnable] = createSignal(false);
-  const [danmakuInsArr, setDanmakuInsArr] = createRefValue([]);
   const [comments, setComments] = createSignal([]);
   const [vid, setVid] = createRefValue('');
   const [timeCount, setTimeCount] = createRefValue(-1);
   const [getZenCursorTimer, setZenCursorTimer] = createRefValue(0);
+  const [danmakuInjectorRef, setDanmakuInjector] = createRefValue(null);
 
   const timeupdateHandler = createMemo(() => async function() {
     const currentTime = Number.parseInt(this.currentTime);
@@ -72,7 +72,7 @@ export const DanmakuFusion = (props) => {
 
   const fullscreenChangeHandler = createMemo(() => function() {
     setTimeout(() => {
-      danmakuInsArr().forEach((ins) => ins.resize());
+      danmakuInjectorRef().resize();
     }, 200);
 
     if (document.fullscreenElement) {
@@ -136,13 +136,13 @@ export const DanmakuFusion = (props) => {
   const onClickDanmakuOperate = (type) => {
     switch (type) {
       case DanmakuOperateType.Resize:
-        danmakuInsArr().forEach((ins) => ins.resize());
+        danmakuInjectorRef().resize();
         break;
       case DanmakuOperateType.Hide:
-        danmakuInsArr().forEach((ins) => ins.hide());
+        danmakuInjectorRef().hide();
         break;
       case DanmakuOperateType.Show:
-        danmakuInsArr().forEach((ins) => ins.show());
+        danmakuInjectorRef().show();
         break;
       default:
         console.warn(`Unexcept DanmakuOperateType, current is ${type}`);
@@ -157,7 +157,7 @@ export const DanmakuFusion = (props) => {
     }
 
     setTimeout(() => {
-      danmakuInsArr().forEach((ins) => ins.resize());
+      danmakuInjectorRef().resize();
     }, 200);
   };
 
@@ -167,7 +167,7 @@ export const DanmakuFusion = (props) => {
         rootRef={props.rootRef}
         videoRef={props.videoRef}
         comments={comments()}
-        onDanmakuInsListUpdate={(arr) => setDanmakuInsArr(arr)}
+        danmakuInjectorRef={setDanmakuInjector}
       />
       <ControlBar
         danmakuOperationEnable={danmakuOperationEnable()}

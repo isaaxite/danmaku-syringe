@@ -1,17 +1,6 @@
-import { createEffect, createMemo, createSignal, splitProps } from "solid-js";
-import { DANMAKU_POOL_ELEMENT_ID, MAX_POOL_NUM } from "./constant";
-import { generateRandomString } from "./utils";
-import Danmaku from "danmaku";
-
-function appendDanmakuWraperTo(parentRef) {
-  const danmakuContainerID = `danmaku-migrate_danmaku-wraper-${generateRandomString()}`;
-  const danmakuWraperRef = document.createElement('DIV');
-  danmakuWraperRef.setAttribute('id', danmakuContainerID);
-  danmakuWraperRef.classList = 'absolute top-20 bottom-20 left-0 w-full z-1001';
-  danmakuWraperRef.style = "pointer-events: none;";
-  parentRef.appendChild(danmakuWraperRef);
-  return danmakuWraperRef;
-};
+import { createEffect, onMount, splitProps } from "solid-js";
+import { DANMAKU_POOL_ELEMENT_ID } from "./constant";
+import { createRefValue, DanmakuInjector } from "./utils";
 
 export const DanmakuPool = (props) => {
   const [local, other] = splitProps(props, [
@@ -19,18 +8,13 @@ export const DanmakuPool = (props) => {
     'rootRef',
     'videoRef',
     'comments',
-    'onDanmakuInsListUpdate',
+    'danmakuInjectorRef',
   ]);
   const comments = () => local.comments;
-  const getDanmakuPoolRef = createMemo(() => []);
-
-  const onDanmakuInsListUpdate = () => {
-    if (!local.onDanmakuInsListUpdate) {
-      return;
-    }
-    const danmakuInsList = getDanmakuPoolRef().map(([danmaku]) => danmaku);
-    local.onDanmakuInsListUpdate(danmakuInsList);
-  };
+  const [danmakuInjector] = createRefValue(new DanmakuInjector({
+    rootRef: local.rootRef,
+    videoRef: local.videoRef,
+  }));
 
   createEffect(function onCommentsUpdate() {
     console.info('[createEffect] onCommentsUpdate invoked');
@@ -39,34 +23,11 @@ export const DanmakuPool = (props) => {
       return;
     }
 
-    const danmakuPool = getDanmakuPoolRef();
-    if (danmakuPool.length < MAX_POOL_NUM) {
-      const containerRef = appendDanmakuWraperTo(local.rootRef);
-      const danmaku = new Danmaku({
-        container: containerRef,
-        media: local.videoRef,
-        comments: comments(),
-      });
-      danmakuPool.push([danmaku, containerRef]);
-      onDanmakuInsListUpdate();
-      return;
-    }
+    danmakuInjector().comments(comments());
+  });
 
-    let oldDanmakuPoolItem = danmakuPool[0];
-    danmakuPool[0] = danmakuPool[1];
-    oldDanmakuPoolItem[0].destroy();
-    oldDanmakuPoolItem[1].innerHTML = '';
-    danmakuPool[1] = [
-      new Danmaku({
-        container: oldDanmakuPoolItem[1],
-        media: local.videoRef,
-        comments: comments(),
-      }),
-      oldDanmakuPoolItem[1],
-    ];
-    oldDanmakuPoolItem = null;
-
-    onDanmakuInsListUpdate();
+  onMount(() => {
+    local.danmakuInjectorRef?.(danmakuInjector());
   });
 
   return (

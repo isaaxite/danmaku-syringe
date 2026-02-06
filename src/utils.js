@@ -1,3 +1,4 @@
+import Danmaku from "danmaku";
 import { createMemo } from "solid-js";
 
 function decimalToHexColor(decimalColor) {
@@ -120,30 +121,6 @@ export function generateRandomString(length = 8, charset = '') {
   return result;
 }
 
-export class ZenCursor {
-  constructor(props) {
-    // 隐藏鼠标指针在指定元素区域內生效
-    this.containerRef = props.containerRef;
-    // this.
-  }
-
-  init() {
-
-  }
-
-  start() {
-
-  }
-
-  stop() {
-
-  }
-
-  destroy() {
-
-  }
-}
-
 export function findHighestMatchingAncestor(video) {
   const videoRect = video.getBoundingClientRect();
   let highestMatch = null;
@@ -180,4 +157,62 @@ export function createRefValue(defValue) {
       getter()[0] = value;
     },
   ];
+}
+
+export class DanmakuInjector {
+  constructor(props) {
+    this.rootRef = props.rootRef;
+    this.videoRef = props.videoRef;
+    this.danmakuPoolLimit = 2;
+    this.danmakuPool = [];
+  }
+
+  appendDanmakuWraperTo(parentRef) {
+    const danmakuContainerID = `danmaku-migrate_danmaku-wraper-${generateRandomString()}`;
+    const danmakuWraperRef = document.createElement('DIV');
+    danmakuWraperRef.setAttribute('id', danmakuContainerID);
+    danmakuWraperRef.classList = 'absolute top-20 bottom-20 left-0 w-full z-1001';
+    danmakuWraperRef.style = "pointer-events: none;";
+    parentRef.appendChild(danmakuWraperRef);
+    return danmakuWraperRef;
+  }
+
+  resize() {
+    this.danmakuPool.forEach(([danmaku]) => danmaku.resize());
+  }
+
+  hide() {
+    this.danmakuPool.forEach(([danmaku]) => danmaku.hide());
+  }
+
+  show() {
+    this.danmakuPool.forEach(([danmaku]) => danmaku.show());
+  }
+
+  comments(comments) {
+    if (this.danmakuPool.length < this.danmakuPoolLimit) {
+      const containerRef = this.appendDanmakuWraperTo(this.rootRef);
+      const danmaku = new Danmaku({
+        container: containerRef,
+        media: this.videoRef,
+        comments,
+      });
+      this.danmakuPool.push([danmaku, containerRef]);
+      return;
+    }
+
+    let oldDanmakuPoolItem = this.danmakuPool[0];
+    this.danmakuPool[0] = this.danmakuPool[1];
+    oldDanmakuPoolItem[0].destroy();
+    oldDanmakuPoolItem[1].innerHTML = '';
+    this.danmakuPool[1] = [
+      new Danmaku({
+        container: oldDanmakuPoolItem[1],
+        media: this.videoRef,
+        comments,
+      }),
+      oldDanmakuPoolItem[1],
+    ];
+    oldDanmakuPoolItem = null;
+  }
 }
