@@ -1,7 +1,6 @@
 import { createMemo, createSignal } from "solid-js";
 import { ControlBar } from "../ControlBar";
-import { DanmakuPool } from "../DanmakuPool";
-import { createRefValue, xmlDanmakuToJson } from "../utils";
+import { createRefValue, DanmakuInjector, xmlDanmakuToJson } from "../utils";
 import { DanmakuOperateType, DanmakuSource, FULLSCREEN_CHANGE_EVENTS, SINGLE_DANMAKU_STYLE, VIDEO_TIME_SLOT_UNIT } from "../constant";
 import { requestVqqBatchDanmaku } from "./request";
 import { IconRadiusButton } from "../Component/Button";
@@ -21,21 +20,13 @@ import { CollapseIcon } from "../Component/Svg";
  */
 export const DanmakuFusion = (props) => {
   const [danmakuOperationEnable, setdanmakuOperationEnable] = createSignal(false);
-  const [comments, setComments] = createSignal([]);
   const [vid, setVid] = createRefValue('');
   const [timeCount, setTimeCount] = createRefValue(-1);
   const [getZenCursorTimer, setZenCursorTimer] = createRefValue(0);
-  const [danmakuInjectorRef, setDanmakuInjector] = createRefValue(null);
-
-  const timeupdateHandler = createMemo(() => async function() {
-    const currentTime = Number.parseInt(this.currentTime);
-    const curTimeCount = Number.parseInt(currentTime / VIDEO_TIME_SLOT_UNIT);
-    if (curTimeCount !== timeCount()) {
-      setTimeCount(curTimeCount);
-      const comments = await requestVqqBatchDanmaku(vid(), curTimeCount);
-      setComments(comments);
-    }
-  });
+  const [danmakuInjector] = createRefValue(new DanmakuInjector({
+    rootRef: props.rootRef,
+    videoRef: props.videoRef,
+  }));
 
   const zenCursorMousemoveHandler = createMemo(() => function() {
     getZenCursorTimer() && clearTimeout(getZenCursorTimer());
@@ -72,7 +63,7 @@ export const DanmakuFusion = (props) => {
 
   const fullscreenChangeHandler = createMemo(() => function() {
     setTimeout(() => {
-      danmakuInjectorRef().resize();
+      danmakuInjector().resize();
     }, 200);
 
     if (document.fullscreenElement) {
@@ -90,6 +81,23 @@ export const DanmakuFusion = (props) => {
       document.addEventListener(eventName, fullscreenChangeHandler(), false);
     });
   };
+
+  const danmakuComments = (comments) => {
+    danmakuInjector().comments(comments);
+
+    setdanmakuOperationEnable(true);
+    addFullscreenchangeListener();
+  };
+
+  const timeupdateHandler = createMemo(() => async function() {
+    const currentTime = Number.parseInt(this.currentTime);
+    const curTimeCount = Number.parseInt(currentTime / VIDEO_TIME_SLOT_UNIT);
+    if (curTimeCount !== timeCount()) {
+      setTimeCount(curTimeCount);
+      const comments = await requestVqqBatchDanmaku(vid(), curTimeCount);
+      danmakuComments(comments);
+    }
+  });
   
   const removeTimeupdateListener = () => props.videoRef.removeEventListener('timeupdate', timeupdateHandler());
 
@@ -111,7 +119,7 @@ export const DanmakuFusion = (props) => {
       }
     }));
 
-    setComments(comments);
+    danmakuComments(comments);
   };
 
   const applyDanmakuConf = (danmakuSource, rest) => {
@@ -119,14 +127,10 @@ export const DanmakuFusion = (props) => {
       case DanmakuSource.Bilibili:
         removeTimeupdateListener(); // if exist!
         consumeBilibiliDanmaku(rest.xmlText);
-        setdanmakuOperationEnable(true);
-        addFullscreenchangeListener();
         break;
       case DanmakuSource.Vqq:
         setVid(rest.vid);
         addTimeupdateListener();
-        setdanmakuOperationEnable(true);
-        addFullscreenchangeListener();
         break;
       default:
         console.warn(`Unexcept DanmakuSource type, current is ${danmakuSource || '<empty string>'}`);
@@ -136,13 +140,13 @@ export const DanmakuFusion = (props) => {
   const onClickDanmakuOperate = (type) => {
     switch (type) {
       case DanmakuOperateType.Resize:
-        danmakuInjectorRef().resize();
+        danmakuInjector().resize();
         break;
       case DanmakuOperateType.Hide:
-        danmakuInjectorRef().hide();
+        danmakuInjector().hide();
         break;
       case DanmakuOperateType.Show:
-        danmakuInjectorRef().show();
+        danmakuInjector().show();
         break;
       default:
         console.warn(`Unexcept DanmakuOperateType, current is ${type}`);
@@ -157,31 +161,23 @@ export const DanmakuFusion = (props) => {
     }
 
     setTimeout(() => {
-      danmakuInjectorRef().resize();
+      danmakuInjector().resize();
     }, 200);
   };
 
   return (
-    <>
-      <DanmakuPool
-        rootRef={props.rootRef}
-        videoRef={props.videoRef}
-        comments={comments()}
-        danmakuInjectorRef={setDanmakuInjector}
-      />
-      <ControlBar
-        danmakuOperationEnable={danmakuOperationEnable()}
-        onClickApplyDanmakuSrc={applyDanmakuConf}
-        onClickToggleFullscreen={toggleFullscreen}
-        onClickDanmakuOperate={onClickDanmakuOperate}
-      >
-        {props.showCollapseBtn ? (
-          <IconRadiusButton className="ml-3 mr-2" onClick={() => {
-            props.videoRef.pause();
-            props.onClickCollapseBtn();
-          }}><CollapseIcon /></IconRadiusButton>
-        ) : (<></>)}
-      </ControlBar>
-    </>
+    <ControlBar
+      danmakuOperationEnable={danmakuOperationEnable()}
+      onClickApplyDanmakuSrc={applyDanmakuConf}
+      onClickToggleFullscreen={toggleFullscreen}
+      onClickDanmakuOperate={onClickDanmakuOperate}
+    >
+      {props.showCollapseBtn ? (
+        <IconRadiusButton className="ml-3 mr-2" onClick={() => {
+          props.videoRef.pause();
+          props.onClickCollapseBtn();
+        }}><CollapseIcon /></IconRadiusButton>
+      ) : (<></>)}
+    </ControlBar>
   );
 };

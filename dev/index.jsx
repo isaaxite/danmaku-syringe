@@ -11,7 +11,6 @@ import HoverBlock from "./src/HoverBlock";
 import Home from "./src/Home";
 import { onMount } from "solid-js";
 import ControlBar from "./src/ControlBar";
-import DanmakuPool from "./src/DanmakuPool";
 import DanmakuFusion from "./src/DanmakuFusion";
 
 const styleWraperFactory = (hideWhat) => (Component) => () => {
@@ -59,7 +58,6 @@ const App = (props) => (
       <Tab href="/top-drawer">/top-drawer</Tab>
       <Tab href="/hover-block">/hover-block</Tab>
       <Tab href="/controlbar">/control-bar</Tab>
-      <Tab href="/danmaku-pool">/danmaku-pool</Tab>
       <Tab href="/danmaku-fusion">/danmaku-fusion</Tab>
     </nav>
     {props.children}
@@ -79,7 +77,6 @@ render(
       <Route path="/select" component={hideAll(Select)} />
       <Route path="/textarea" component={hideAll(Textarea)} />
       <Route path="/controlbar" component={hideExt(ControlBar)} />
-      <Route path="/danmaku-pool" component={hideExt(DanmakuPool)} />
       <Route path="/danmaku-fusion" component={hideExt(DanmakuFusion)} />
     </HashRouter>
   ),

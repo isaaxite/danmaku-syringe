@@ -168,7 +168,7 @@ export class DanmakuInjector {
   }
 
   appendDanmakuWraperTo(parentRef) {
-    const danmakuContainerID = `danmaku-migrate_danmaku-wraper-${generateRandomString()}`;
+    const danmakuContainerID = `danmaku-wraper-${generateRandomString()}`;
     const danmakuWraperRef = document.createElement('DIV');
     danmakuWraperRef.setAttribute('id', danmakuContainerID);
     danmakuWraperRef.classList = 'absolute top-20 bottom-20 left-0 w-full z-1001';
