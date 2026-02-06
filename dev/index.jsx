@@ -8,7 +8,6 @@ import Input from "./src/Input";
 import Select from "./src/Select";
 import Textarea from "./src/Textarea";
 import HoverBlock from "./src/HoverBlock";
-import TabPage from "./src/TabPage";
 import Home from "./src/Home";
 import { onMount } from "solid-js";
 import ControlBar from "./src/ControlBar";
@@ -59,7 +58,6 @@ const App = (props) => (
       <Tab href="/textarea">/textarea</Tab>
       <Tab href="/top-drawer">/top-drawer</Tab>
       <Tab href="/hover-block">/hover-block</Tab>
-      <Tab href="/tab-page">/tab-page</Tab>
       <Tab href="/controlbar">/control-bar</Tab>
       <Tab href="/danmaku-pool">/danmaku-pool</Tab>
       <Tab href="/danmaku-fusion">/danmaku-fusion</Tab>
@@ -77,7 +75,6 @@ render(
       <Route path="/button" component={hideAll(Button)} />
       <Route path="/top-drawer" component={hideAll(TopDrawer)} />
       <Route path="/hover-block" component={hideAll(HoverBlock)} />
-      <Route path="/tab-page" component={hideAll(TabPage)} />
       <Route path="/input" component={hideAll(Input)} />
       <Route path="/select" component={hideAll(Select)} />
       <Route path="/textarea" component={hideAll(Textarea)} />
