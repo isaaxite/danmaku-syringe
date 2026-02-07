@@ -1,7 +1,7 @@
 import { createSignal, Match, Show, splitProps, Switch } from "solid-js";
 import { HoverBlock } from "./Component/HoverBlock";
 import { BilibiliDanmakuGetterType, DanmakuOperateType, DanmakuSource, PRIMARY_BG_COLOR } from "./constant";
-import { Button, PureButton } from "./Component/Button";
+import { Button, PureButton, SimpleTooltip } from "./Component/Button";
 import { DanmakuToggleIcon, ResizeIcon, ToggleFullscreenIcon } from "./Component/Svg";
 import { TopDrawer } from "./Component/Drawer";
 import { DropdownMenu } from "./Component/Select";
@@ -128,24 +128,36 @@ export const ControlBar = (props) => {
               />
             </span>
 
-            <PureButton
-              className="p-1 rounded-sm mx-1"
-              onClick={() => local.onClickDanmakuOperate(DanmakuOperateType.Resize)}
+            <SimpleTooltip
+              placement="bottom-right"
+              content="重置弹幕池尺寸"
+              contentClass="w-24"
             >
-              <ResizeIcon class="size-6" />
-            </PureButton>
+              <PureButton
+                className="p-1 rounded-sm mx-1"
+                onClick={() => local.onClickDanmakuOperate(DanmakuOperateType.Resize)}
+              >
+                <ResizeIcon class="size-6" />
+              </PureButton>
+            </SimpleTooltip>
 
-            <PureButton
-              className="p-1 rounded-sm mx-1"
-              onClick={() => {
-                local.onClickDanmakuOperate(
-                  danmakuIsInvisible() ? DanmakuOperateType.Show : DanmakuOperateType.Hide
-                );
-                setDanmakuIsInvisible(!danmakuIsInvisible());
-              }}
+            <SimpleTooltip
+              placement="bottom-right"
+              content="弹幕显示/隐藏"
+              contentClass="w-24"
             >
-              <DanmakuToggleIcon class="size-6" active={!danmakuIsInvisible()} />
-            </PureButton>
+              <PureButton
+                className="p-1 rounded-sm mx-1"
+                onClick={() => {
+                  local.onClickDanmakuOperate(
+                    danmakuIsInvisible() ? DanmakuOperateType.Show : DanmakuOperateType.Hide
+                  );
+                  setDanmakuIsInvisible(!danmakuIsInvisible());
+                }}
+              >
+                <DanmakuToggleIcon class="size-6" active={!danmakuIsInvisible()} />
+              </PureButton>
+            </SimpleTooltip>
           </Show>
 
           <PureButton className="p-1 rounded-sm mx-1" onClick={() => {

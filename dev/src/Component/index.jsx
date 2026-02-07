@@ -9,7 +9,7 @@ const VariantType = {
 
 export const Page = (props) => {
   return (
-    <div className="mt-4 px-2 relative"><hr />{props.children}</div>
+    <div className={`mt-4 px-2 relative ${props.className || ''}`}><hr />{props.children}</div>
   );
 };
 
@@ -17,7 +17,7 @@ export const Block = (props) => {
   return (
     <>
       {props.title ? (<h1 className="relative top-1 mt-2 ml-2 text-2xl font-bold">{props.title}</h1>) : (<></>)}
-      <div className="mt-4 mx-2 overflow-hidden" ref={props.ref}>{props.children}</div>
+      <div className={`mt-4 mx-2 overflow-hidden ${props.className || ''}`} ref={props.ref}>{props.children}</div>
     </>
   );
 };

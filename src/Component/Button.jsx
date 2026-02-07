@@ -45,7 +45,7 @@ const PLACEMENT_CLASSNAME = {
     baseline: 'bottom',
     tooltip: 'top-1 right-0',
     arrow: 'top-0 right-1/4 -translate-x-1/4 -mb-1'
-  }
+  },
 };
 
 export const Baseline = (props) => {
@@ -86,9 +86,11 @@ export function SimpleTooltip(props) {
       `} placement={placementClassName.baseline}>
         <div
           class={`
-            absolute z-51 px-3 py-2 text-sm bg-slate-50
+            min-w-20 text-wrap break-normal text-center
+            absolute z-51 px-1 py-2 text-xs bg-slate-50
             rounded-md shadow-lg
             ${placementClassName.tooltip}
+            ${props.contentClass || ''}
           `}
         >
           {props.content}

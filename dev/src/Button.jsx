@@ -1,12 +1,12 @@
 import { Button, InlineButton, SimpleTooltip } from "../../src/Component/Button";
-import { Block, InlineBlock, Page } from "./Component";
+import { Block, Page } from "./Component"
 
 export default () => (
-  <Page>
+  <Page className="bg-blue-200">
     <InlineButton>行内按钮-1</InlineButton>
     <InlineButton>行内按钮-2</InlineButton>
 
-    <Block>
+    <Block className="overflow-visible">
       <SimpleTooltip className="ml-5" placement="bottom" content="SimpleTooltip SimpleTooltip">
         <InlineButton>Tooltip bottom</InlineButton>
       </SimpleTooltip>

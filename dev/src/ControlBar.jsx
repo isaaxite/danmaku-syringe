@@ -7,9 +7,29 @@ export default () => {
   const [danmakuOperationEnable, setDanmakuOperationEnable] = createSignal(false);
   return (
     <Page>
-      <Block ref={setRef}>
+      <Block className="relative h-20" ref={setRef}>
         <ControlBar
           danmakuOperationEnable={danmakuOperationEnable()}
+          onClickApplyDanmakuSrc={(...rest) => {
+            console.info(...rest)
+            setDanmakuOperationEnable(true);
+          }}
+          onClickToggleFullscreen={() => {
+            if (document.fullscreenElement) {
+              document.exitFullscreen();
+            } else {
+              ref().requestFullscreen();
+            }
+          }}
+          onClickDanmakuOperate={(...rest) => {
+            console.info(...rest)
+          }}
+        />
+      </Block>
+
+      <Block className="relative h-20" ref={setRef}>
+        <ControlBar
+          danmakuOperationEnable={true}
           onClickApplyDanmakuSrc={(...rest) => {
             console.info(...rest)
             setDanmakuOperationEnable(true);
