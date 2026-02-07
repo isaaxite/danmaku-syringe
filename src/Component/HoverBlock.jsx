@@ -48,8 +48,8 @@ export const HoverBlock = (props) => {
   return (
     <div
       class={`
-        transition-opacity duration-200
-        ${isVisible() || local.forceVisible ? 'opacity-100' : 'opacity-0'}
+        transition-opacity duration-300
+        ${isVisible() || local.forceVisible ? 'opacity-100' : 'delay-700 opacity-0'}
         ${local.className || ''}
       `}
       onMouseEnter={handleMouseEnter}
