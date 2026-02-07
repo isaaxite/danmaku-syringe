@@ -82,12 +82,14 @@ export const ControlBar = (props) => {
       `}
     >
       <HoverBlock
-        className={`${PRIMARY_BG_COLOR} shadow shadow-gray-700`}
+        className="pb-1"
         forceVisible={forceVisible()}
         // onMouseEnter={() => setForceVisible(false)}
         onMouseEnter={() => setForceVisible(false)}
       >
-        <div className=" inline-flex justify-end py-2 px-1">
+        <div className={`flex justify-end py-2 px-1`}>
+          <div className={`${PRIMARY_BG_COLOR} shadow-gray-700 -z-1 opacity-80 absolute top-0 bottom-1 left-0 w-full`} />
+
           <Button onClick={() => {
             setIsDanmakuSrcConf(true);
             setForceVisible(true);
