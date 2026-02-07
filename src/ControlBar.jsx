@@ -94,6 +94,38 @@ export const ControlBar = (props) => {
           }}>弹幕源配置</Button>
 
           <Show when={danmakuOperationEnable()}>
+            <span className="text-white text-xs inline-block mx-1 align-bottom">
+              字号: 
+              <DropdownMenu
+                selected={'20'}
+                options={[
+                  { text: '16px', value: '16' },
+                  { text: '18px', value: '18' },
+                  { text: '20px', value: '20' },
+                  { text: '22px', value: '22' },
+                  { text: '24px', value: '24' },
+                ]}
+                onChange={(fontSize) => {
+                  local.onClickDanmakuOperate(DanmakuOperateType.FontSize, { fontSize });
+                }}
+              />
+            </span>
+
+            <span className="text-white text-xs inline-block mx-1 align-bottom">
+              不透明: 
+              <DropdownMenu
+                selected={'1'}
+                options={[
+                  { text: '100%', value: '1' },
+                  { text: '80%', value: '0.8' },
+                  { text: '60%', value: '0.6' },
+                ]}
+                onChange={(opacity) => {
+                  local.onClickDanmakuOperate(DanmakuOperateType.Opacity, { opacity });
+                }}
+              />
+            </span>
+
             <PureButton
               className="p-1 rounded-sm mx-1"
               onClick={() => local.onClickDanmakuOperate(DanmakuOperateType.Resize)}

@@ -115,7 +115,7 @@ export const DanmakuFusion = (props) => {
       style: {
         ...SINGLE_DANMAKU_STYLE,
         color: item.color,
-        fontSize: `${item.fontSize}px`,
+        // fontSize: `${item.fontSize}px`,
       }
     }));
 
@@ -137,7 +137,7 @@ export const DanmakuFusion = (props) => {
     }
   };
 
-  const onClickDanmakuOperate = (type) => {
+  const onClickDanmakuOperate = (type, rest) => {
     switch (type) {
       case DanmakuOperateType.Resize:
         danmakuInjector().resize();
@@ -147,6 +147,12 @@ export const DanmakuFusion = (props) => {
         break;
       case DanmakuOperateType.Show:
         danmakuInjector().show();
+        break;
+      case DanmakuOperateType.FontSize:
+        danmakuInjector().setFontSize(rest.fontSize);
+        break;
+      case DanmakuOperateType.Opacity:
+        danmakuInjector().setOpacity(rest.opacity);
         break;
       default:
         console.warn(`Unexcept DanmakuOperateType, current is ${type}`);

@@ -163,18 +163,49 @@ export class DanmakuInjector {
   constructor(props) {
     this.rootRef = props.rootRef;
     this.videoRef = props.videoRef;
+
+    this.fontSize = 20;
+    this.opacity = 1;
     this.danmakuPoolLimit = 2;
     this.danmakuPool = [];
+  }
+
+  getStyle() {
+    const lineHeight = Math.ceil(this.fontSize / 2 * 3);
+    return [
+      'pointer-events: none;',
+      `font-size: ${this.fontSize}px;`,
+      `line-height: ${lineHeight}px;`,
+      `opacity: ${this.opacity};`,
+    ].join('');
   }
 
   appendDanmakuWraperTo(parentRef) {
     const danmakuContainerID = `danmaku-wraper-${generateRandomString()}`;
     const danmakuWraperRef = document.createElement('DIV');
     danmakuWraperRef.setAttribute('id', danmakuContainerID);
-    danmakuWraperRef.classList = 'absolute top-20 bottom-20 left-0 w-full z-1001';
-    danmakuWraperRef.style = "pointer-events: none;";
+    danmakuWraperRef.classList = 'absolute top-10 bottom-10 left-0 w-full z-1001';
+    danmakuWraperRef.style = this.getStyle();
     parentRef.appendChild(danmakuWraperRef);
     return danmakuWraperRef;
+  }
+
+  updateStyle() {
+    const style = this.getStyle();
+    this.danmakuPool.forEach(it => {
+      const containerRef = it[1];
+      containerRef.style = style;
+    });
+  }
+
+  setFontSize(fontSize) {
+    this.fontSize = fontSize;
+    this.updateStyle();
+  }
+
+  setOpacity(opacity) {
+    this.opacity = opacity;
+    this.updateStyle();
   }
 
   resize() {
