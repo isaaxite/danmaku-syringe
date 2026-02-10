@@ -12,6 +12,7 @@ import Home from "./src/Home";
 import { onMount } from "solid-js";
 import ControlBar from "./src/ControlBar";
 import DanmakuFusion from "./src/DanmakuFusion";
+import EntryBar from "./src/EntryBar";
 
 const styleWraperFactory = (hideWhat) => (Component) => () => {
   const display = (rest) => {
@@ -59,6 +60,7 @@ const App = (props) => (
       <Tab href="/hover-block">/hover-block</Tab>
       <Tab href="/controlbar">/control-bar</Tab>
       <Tab href="/danmaku-fusion">/danmaku-fusion</Tab>
+      <Tab href="/entry-bar">/entry-bar</Tab>
     </nav>
     {props.children}
   </>
@@ -78,6 +80,7 @@ render(
       <Route path="/textarea" component={hideAll(Textarea)} />
       <Route path="/controlbar" component={hideExt(ControlBar)} />
       <Route path="/danmaku-fusion" component={hideExt(DanmakuFusion)} />
+      <Route path="/entry-bar" component={hideExt(EntryBar)} />
     </HashRouter>
   ),
   byproductRootRef

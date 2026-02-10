@@ -1,7 +1,7 @@
-import { createSignal, Match, Show, Switch } from "solid-js";
-import { Button, IconRadiusButton } from "../Component/Button";
+import { createMemo, createSignal, Match, Show, Switch } from "solid-js";
+import { Button, IconRadiusButton, PureButton, SimpleTooltip } from "../Component/Button";
 import { DropdownMenu } from "../Component/Select";
-import { DMWordsIcon, SyringeIcon } from "../Component/Svg";
+import { ToggleIcon, DMWordsIcon, SyringeIcon } from "../Component/Svg";
 import { Checkbox, TextInput } from "../Component/Input";
 import { ContainerType } from "../constant";
 
@@ -10,12 +10,15 @@ export const EntryBarView = (props) => {
   const [isExpanded, setIsExpanded] = createSignal(false);
   const [isInsertPointAuto, setIsInsertPointAuto] = createSignal(true);
   const [insertPath, setInsertPath] = createSignal('');
+  const [autoHide, setAutoHide] = createSignal(false);
+  const isHide = createMemo(() => !isExpanded() && autoHide());
 
   return (
-    <div className="flex flex-row justify-end overflow-hidden">
+    <div className="flex flex-row justify-end">
       <div className={`
         bg-gray-900 pt-2.5 pb-3 pr-3 pl-15 rounded-s-full transition-all relative
         ${isExpanded() ? 'translate-x-0' : 'translate-x-[calc(100%-3.1rem)]'}
+        ${isHide() ? 'opacity-0 hover:opacity-100' : ''}
       `}>
 
         <IconRadiusButton
@@ -82,6 +85,24 @@ export const EntryBarView = (props) => {
             }}>创建</Button>
           </Match>
         </Switch>
+
+        <SimpleTooltip
+          className="ml-4 align-bottom"
+          placement="bottom-right"
+          content={`${autoHide() ? '关闭' : '开启'}自动隐藏`}
+        >
+          <PureButton
+            className="relative cursor-pointer rounded-sm p-0.5"
+            onClick={() => {
+              if (!autoHide()) {
+                setIsExpanded(false);
+              }
+              setAutoHide(!autoHide());
+            }}
+          >
+            <ToggleIcon class="size-5" />
+          </PureButton>
+        </SimpleTooltip>
       </div>
     </div>
   );
