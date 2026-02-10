@@ -7,6 +7,7 @@ import { TopDrawer } from "./Component/Drawer";
 import { DropdownMenu } from "./Component/Select";
 import { RadioList, TextInput, Upload } from "./Component/Input";
 import { Textarea } from "./Component/Textarea";
+import { copyToClipboard } from "./utils";
 
 const logInfo = (...rest) => console.info('[Info:ControlBar]', ...rest);
 const logWarn = (...rest) => console.warn('[Warn:ControlBar]', ...rest);
@@ -27,8 +28,10 @@ export const ControlBar = (props) => {
   const [isDanmakuSrcConf, setIsDanmakuSrcConf] = createSignal(false);
   const [selectedDanmakuSrc, setSelectedDanmakuSrc] = createSignal(DanmakuSource.Bilibili);
   const [vid, setVid] = createSignal('');
-  const [bilibiliDanmakuGetterType, setBilibiliDanmakuGetterType] = createSignal(BilibiliDanmakuGetterType.XmlText);
+  const [bilibiliDanmakuGetterType, setBilibiliDanmakuGetterType] = createSignal(BilibiliDanmakuGetterType.UploadFile);
   const [xmlText, setXmlText] = createSignal('');
+  const [oid, setOid] = createSignal('');
+  const [linkGetXmlText, setLinkGetXmlText] =createSignal('');
 
   const handleBilibiliDanmakuXmlSelect = (files) => {
     const file = files[0];
@@ -201,8 +204,9 @@ export const ControlBar = (props) => {
                   className="mb-4 relative right-2"
                   name="bilibi-danmaku_getter-type"
                   list={[
-                    { label: 'XML 文本', value: BilibiliDanmakuGetterType.XmlText },
                     { label: '上传文件', value: BilibiliDanmakuGetterType.UploadFile },
+                    { label: 'XML 文本', value: BilibiliDanmakuGetterType.XmlText },
+                    { label: '生成链接', value: BilibiliDanmakuGetterType.GenerateLink },
                     // { label: '本地服务', value: BilibiliDanmakuGetterType.LocalServe },
                   ]}
                   defValue={bilibiliDanmakuGetterType()}
@@ -219,17 +223,44 @@ export const ControlBar = (props) => {
                   </Match> */}
                   <Match when={bilibiliDanmakuGetterType() === BilibiliDanmakuGetterType.XmlText}>
                     <Textarea
+                      className="w-90 h-30"
                       placeholder="粘贴 XML 文本至此"
                       value={xmlText()}
                       onChange={setXmlText}
                     />
+                  </Match>
+                  <Match when={bilibiliDanmakuGetterType() === BilibiliDanmakuGetterType.GenerateLink}>
+                    <TextInput
+                      placeholder="输入 oid"
+                      value={oid()}
+                      onChange={setOid}
+                    />
+                    <Button onClick={async () => {
+                      if (!oid()) {
+                        return;
+                      }
+                      const link = `https://api.bilibili.com/x/v1/dm/list.so?oid=${oid()}`;
+                      setLinkGetXmlText(link);
+                      copyToClipboard(link);
+                    }}>生成链接</Button>
+
+                    <Show when={linkGetXmlText()}>
+                      <div className="mt-4">
+                        <TextInput className="w-110" readonly={true} value={linkGetXmlText()} />
+                        <Button onClick={() => {
+                          window.open();
+                        }}>复制去新页面粘贴打开</Button>
+                      </div>
+                    </Show>
                   </Match>
                 </Switch>
               </div>
             </Match>
           </Switch>
 
-          <Button className="mt-8" onClick={onClickApplyBtn}>应用</Button>
+          <Show when={selectedDanmakuSrc() === DanmakuSource.Vqq || bilibiliDanmakuGetterType() !== BilibiliDanmakuGetterType.GenerateLink}>
+            <Button className="mt-8" onClick={onClickApplyBtn}>应用</Button>
+          </Show>
         </div>
       </TopDrawer>
     </div>

@@ -34,6 +34,7 @@ export const BilibiliDanmakuGetterType = {
   LocalServe: 'localserve',
   UploadFile: 'uploadfile',
   XmlText: 'xmltext',
+  GenerateLink: 'generateLink',
 };
 
 export const PRIMARY_BG_COLOR = 'bg-gray-900';

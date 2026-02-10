@@ -1,30 +1,32 @@
-import { createSignal } from "solid-js";
+import { createSignal, splitProps } from "solid-js";
 import { generateRandomString } from "../utils";
 
 export const TextInput = (props) => {
-  const value = () => props.value;
-  const inputId = props.id ? props.id : generateRandomString();
-  const attrs = {};
-
-  if (props.placeholder) {
-    attrs.placeholder = props.placeholder;
-  }
+  const [local, other] = splitProps(props, [
+    'id',
+    'value',
+    'label',
+    'className',
+    'onChange',
+  ]);
+  const value = () => local.value;
+  const inputId = local.id || generateRandomString();
 
   return (
     <>
-      {props.label ? (
+      {local.label ? (
         <label className="select-none" for={inputId}>{props.label}</label>
       ) : (<></>)}
       <input
-        {...attrs}
+        {...other}
         className={`
           bg-slate-50 placeholder:text-xs pl-1 w-40 h-6 border rounded border-amber-700 hover:border-amber-800 focus:outline-none
-          ${props.className || ''}
+          ${local.className || ''}
         `}
         id={inputId}
         type="text"
         value={value()}
-        onChange={(e) => props.onChange(e.target.value)}
+        onChange={(e) => local.onChange(e.target.value)}
       />
     </>
   );

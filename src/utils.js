@@ -247,3 +247,14 @@ export class DanmakuInjector {
     oldDanmakuPoolItem = null;
   }
 }
+
+export async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    console.log('文本已成功复制到剪贴板');
+    return true;
+  } catch (err) {
+    console.error('复制失败:', err);
+    return false;
+  }
+}
