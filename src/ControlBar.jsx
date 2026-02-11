@@ -29,11 +29,12 @@ export const ControlBar = (props) => {
   const [selectedDanmakuSrc, setSelectedDanmakuSrc] = createSignal(DanmakuSource.Bilibili);
   const [vid, setVid] = createSignal('');
   const [bilibiliDanmakuGetterType, setBilibiliDanmakuGetterType] = createSignal(BilibiliDanmakuGetterType.UploadFile);
-  const [xmlText, setXmlText] = createSignal('');
+  const [xmlText, setXmlText] = createSignal({ type: null, value: '' });
+  const [youkuXmlText, setYoukuXmlText] = createSignal('');
   const [oid, setOid] = createSignal('');
   const [linkGetXmlText, setLinkGetXmlText] =createSignal('');
 
-  const handleBilibiliDanmakuXmlSelect = (files) => {
+  const handleDanmakuXmlFileSelect = (type, files) => {
     const file = files[0];
     
     if (!file) {
@@ -43,7 +44,9 @@ export const ControlBar = (props) => {
 
     const reader = new FileReader();
     reader.readAsText(file, 'UTF-8');
-    reader.onload = (event) => setXmlText(event.target.result);
+    reader.onload = (event) => {
+      setXmlText({ type, value: event.target.result });
+    };
   };
 
   const onClickApplyBtn = () => {
@@ -53,14 +56,14 @@ export const ControlBar = (props) => {
       return;
     }
 
-    if (selectedDanmakuSrc() === DanmakuSource.Bilibili) {
-      if (!xmlText()) {
+    if ([DanmakuSource.Bilibili, DanmakuSource.Youku].includes(selectedDanmakuSrc())) {
+      if (!xmlText().value) {
         logWarn(`[${selectedDanmakuSrc()}]: xml text empty!`)
         return;
       }
 
       local.onClickApplyDanmakuSrc(selectedDanmakuSrc(), {
-        xmlText: xmlText(),
+        xmlText: xmlText().value,
       });
     } else {
       if (!vid()) {
@@ -184,6 +187,7 @@ export const ControlBar = (props) => {
             options={[
               { text: '腾讯视频', value: DanmakuSource.Vqq },
               { text: 'Bilibili', value: DanmakuSource.Bilibili },
+              { text: '优酷', value: DanmakuSource.Youku },
             ]}
             onChange={(danmakuSource) =>  setSelectedDanmakuSrc(danmakuSource)}
           />
@@ -216,7 +220,7 @@ export const ControlBar = (props) => {
                 <Switch>
                   <Match when={bilibiliDanmakuGetterType() === BilibiliDanmakuGetterType.UploadFile}>
                     {/* <label for="bilibili-danmaku-xml">选择要上传的文件</label> */}
-                    <Upload onChange={handleBilibiliDanmakuXmlSelect} />
+                    <Upload onChange={(files) => handleDanmakuXmlFileSelect(DanmakuSource.Bilibili, files)} />
                   </Match>
                   {/* <Match when={bilibiliDanmakuGetterType() === BilibiliDanmakuGetterType.LocalServe}>
                     服务地址: <input type="text" />
@@ -225,8 +229,8 @@ export const ControlBar = (props) => {
                     <Textarea
                       className="w-90 h-30"
                       placeholder="粘贴 XML 文本至此"
-                      value={xmlText()}
-                      onChange={setXmlText}
+                      value={xmlText().value}
+                      onChange={(value) => setXmlText({ type: DanmakuSource.Bilibili, value })}
                     />
                   </Match>
                   <Match when={bilibiliDanmakuGetterType() === BilibiliDanmakuGetterType.GenerateLink}>
@@ -254,6 +258,17 @@ export const ControlBar = (props) => {
                     </Show>
                   </Match>
                 </Switch>
+              </div>
+            </Match>
+            <Match when={selectedDanmakuSrc() === DanmakuSource.Youku}>
+              <div className="mt-6 pl-1">
+                <Upload onChange={(files) => handleDanmakuXmlFileSelect(DanmakuSource.Youku, files)} />
+
+                <div className="mt-2">
+                  <a target="_blank"
+                  className="text-blue-500 underline text-xs"
+                  href="https://www.kedou.life/caption/scrolling/youku">去第三方下载弹幕文件</a>
+                </div>
               </div>
             </Match>
           </Switch>

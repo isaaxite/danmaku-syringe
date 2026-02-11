@@ -28,6 +28,7 @@ export const CollapseType = {
 export const DanmakuSource = {
   Vqq: 'vqq',
   Bilibili: 'bilibili',
+  Youku: 'youku',
 };
 
 export const BilibiliDanmakuGetterType = {

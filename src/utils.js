@@ -258,3 +258,196 @@ export async function copyToClipboard(text) {
     return false;
   }
 }
+
+// 优酷弹幕 XML 解析器
+export class YoukuDanmakuParser {
+  constructor() {
+    // 弹幕类型映射
+    this.danmakuTypes = {
+      1: 'scroll',    // 滚动弹幕
+      2: 'top',       // 顶部固定
+      3: 'bottom',    // 底部固定
+      5: 'advanced'   // 高级弹幕
+    };
+    
+    // 颜色映射（可选）
+    this.colorMap = {
+      16777215: 'white',
+      16711680: 'red',
+      65280: 'green',
+      255: 'blue',
+      16776960: 'yellow',
+      16711935: 'magenta',
+      65535: 'cyan',
+      0: 'black'
+    };
+  }
+
+  /**
+   * 解析 XML 字符串
+   * @param {string} xmlStr - XML 字符串
+   * @returns {Object} 解析后的 JSON 对象
+   */
+  parseXML(xmlStr) {
+    try {
+      // 使用 DOMParser 解析 XML
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlStr, 'text/xml');
+      
+      // 获取所有 d 元素
+      const dElements = xmlDoc.getElementsByTagName('d');
+      const danmakuList = [];
+      
+      // 解析每条弹幕
+      for (let i = 0; i < dElements.length; i++) {
+        const d = dElements[i];
+        const p = d.getAttribute('p');
+        const text = d.textContent.trim();
+        
+        if (p && text) {
+          const danmaku = this.parseDanmaku(p, text, i);
+          if (danmaku) {
+            danmakuList.push(danmaku);
+          }
+        }
+      }
+      
+      // 按时间排序
+      danmakuList.sort((a, b) => a.time - b.time);
+      
+      return {
+        success: true,
+        count: danmakuList.length,
+        danmakuList: danmakuList,
+        metadata: {
+          source: 'youku',
+          version: '1.0',
+          generateTime: new Date().toISOString()
+        }
+      };
+      
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+        danmakuList: []
+      };
+    }
+  }
+
+  /**
+   * 解析单条弹幕
+   * @param {string} p - p 属性字符串
+   * @param {string} text - 弹幕文本
+   * @param {number} index - 索引
+   * @returns {Object|null} 弹幕对象
+   */
+  parseDanmaku(p, text, index) {
+    try {
+      const params = p.split(',');
+      
+      // 验证参数长度
+      if (params.length < 9) {
+        console.warn(`弹幕 ${index}: 参数数量不足`, params);
+        return null;
+      }
+      
+      const time = parseFloat(params[0]);       // 时间（秒）
+      const type = parseInt(params[1]);         // 类型
+      const size = parseInt(params[2]);         // 字体大小
+      const color = parseInt(params[3]);        // 颜色值
+      const timestamp = parseInt(params[4]);    // 发送时间戳
+      const unknown1 = parseInt(params[5]) || 0;
+      const unknown2 = parseInt(params[6]) || 0;
+      const userId = params[7];                 // 用户ID
+      const danmakuId = params[8];              // 弹幕ID
+      
+      // 清理文本
+      const cleanText = this.cleanText(text);
+      
+      // 构建弹幕对象
+      const danmaku = {
+        id: `${timestamp}_${index}_${danmakuId}`,  // 唯一ID
+        index: index,
+        time: time,                                // 出现时间（秒）
+        type: type,                                // 类型代码
+        typeName: this.danmakuTypes[type] || 'unknown',
+        size: size,                                // 字体大小
+        color: {
+          decimal: color,                          // 十进制颜色值
+          hex: this.decimalToHex(color),           // 十六进制颜色
+          name: this.colorMap[color] || 'custom'   // 颜色名称
+        },
+        timestamp: timestamp,                      // 发送时间戳
+        sendTime: new Date(timestamp * 1000).toISOString(),  // 发送时间
+        userId: userId,                            // 用户ID
+        danmakuId: danmakuId,                      // 弹幕ID
+        text: cleanText,                           // 弹幕内容
+        rawText: text,                             // 原始文本
+        params: params,                            // 原始参数
+        unknown1: unknown1,
+        unknown2: unknown2
+      };
+      
+      return danmaku;
+      
+    } catch (error) {
+      console.error(`解析弹幕失败 (索引: ${index}):`, error);
+      return null;
+    }
+  }
+
+  /**
+   * 清理文本
+   * @param {string} text - 原始文本
+   * @returns {string} 清理后的文本
+   */
+  cleanText(text) {
+    if (!text) return '';
+    
+    // 移除控制字符
+    let clean = text.replace(/[\x00-\x1F\x7F]/g, '');
+    
+    // 移除多余空白
+    clean = clean.replace(/\s+/g, ' ').trim();
+    
+    return clean;
+  }
+
+  /**
+   * 十进制颜色转十六进制
+   * @param {number} decimal - 十进制颜色
+   * @returns {string} 十六进制颜色
+   */
+  decimalToHex(decimal) {
+    return '#' + decimal.toString(16).padStart(6, '0').toUpperCase();
+  }
+}
+
+export function deduplicateDanmaku(arr, getKey) {
+  // 使用 Map 来存储唯一的键值对
+  const map = new Map();
+  
+  arr.forEach(item => {
+    // 创建基于 time 和 text 的唯一键
+    const key = getKey(item);
+    
+    // 如果这个键不存在，或者需要保留最新的记录（假设后面的更新）
+    if (!map.has(key)) {
+      map.set(key, item);
+    } else {
+      const mapItem = map.get(key);
+      mapItem.count = mapItem.count ? mapItem.count + 1 : 1;
+    }
+  });
+  
+  // 返回 Map 中的所有值
+  return Array.from(map.values());
+}
+
+export function plusRandomMS(originTimeSec, msRange) {
+  let time = Number.parseInt(originTimeSec);
+  const randomMS = Number.parseInt(Math.random() * msRange);
+  time = (time * msRange + randomMS) / msRange;
+  return time;
+}

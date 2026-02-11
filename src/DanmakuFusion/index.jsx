@@ -1,6 +1,6 @@
 import { createMemo, createSignal } from "solid-js";
 import { ControlBar } from "../ControlBar";
-import { createRefValue, DanmakuInjector, xmlDanmakuToJson } from "../utils";
+import { createRefValue, DanmakuInjector, deduplicateDanmaku, plusRandomMS, xmlDanmakuToJson, YoukuDanmakuParser } from "../utils";
 import { DanmakuOperateType, DanmakuSource, FULLSCREEN_CHANGE_EVENTS, SINGLE_DANMAKU_STYLE, VIDEO_TIME_SLOT_UNIT } from "../constant";
 import { requestVqqBatchDanmaku } from "./request";
 import { IconRadiusButton } from "../Component/Button";
@@ -122,11 +122,40 @@ export const DanmakuFusion = (props) => {
     danmakuComments(comments);
   };
 
+  const consumeYoukuDanmaku = (xmlText) => {
+    console.info('consumeYoukuDanmaku invoked');
+
+    const parser = new YoukuDanmakuParser();
+    const result = parser.parseXML(xmlText);
+
+    if (!result.success) {
+      console.error(result.error);
+      return;
+    }
+
+    const danmakuList = deduplicateDanmaku(result.danmakuList, (item) => `${item.time}|${item.text}`);
+    const comments = danmakuList.map(item => ({
+      text: item.text,
+      time: plusRandomMS(item.time, 100),
+      style: {
+        ...SINGLE_DANMAKU_STYLE,
+        color: item.color.hex,
+        // fontSize: `${item.fontSize}px`,
+      }
+    }));
+
+    danmakuComments(comments);
+  };
+
   const applyDanmakuConf = (danmakuSource, rest) => {
     switch(danmakuSource) {
       case DanmakuSource.Bilibili:
         removeTimeupdateListener(); // if exist!
         consumeBilibiliDanmaku(rest.xmlText);
+        break;
+      case DanmakuSource.Youku:
+        removeTimeupdateListener(); // if exist!
+        consumeYoukuDanmaku(rest.xmlText);
         break;
       case DanmakuSource.Vqq:
         setVid(rest.vid);
