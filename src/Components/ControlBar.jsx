@@ -1,13 +1,13 @@
 import { createSignal, Match, Show, splitProps, Switch } from "solid-js";
-import { HoverBlock } from "./Component/HoverBlock";
-import { BilibiliDanmakuGetterType, DanmakuOperateType, DanmakuSource, PRIMARY_BG_COLOR } from "./constant";
-import { Button, PureButton, SimpleTooltip } from "./Component/Button";
-import { DanmakuToggleIcon, ResizeIcon, ToggleFullscreenIcon } from "./Component/Svg";
-import { TopDrawer } from "./Component/Drawer";
-import { DropdownMenu } from "./Component/Select";
-import { RadioList, TextInput, Upload } from "./Component/Input";
-import { Textarea } from "./Component/Textarea";
-import { copyToClipboard } from "./utils";
+import { HoverBlock } from "./Common/HoverBlock";
+import { BilibiliDanmakuGetterType, DanmakuOperateType, DanmakuSource, PRIMARY_BG_COLOR } from "../constant";
+import { Button, PureButton, SimpleTooltip } from "./Common/Button";
+import { DanmakuToggleIcon, ResizeIcon, ToggleFullscreenIcon } from "./Common/Svg";
+import { TopDrawer } from "./Common/Drawer";
+import { DropdownMenu } from "./Common/Select";
+import { RadioList, TextInput, Upload } from "./Common/Input";
+import { Textarea } from "./Common/Textarea";
+import { copyToClipboard } from "../utils";
 
 const logInfo = (...rest) => console.info('[Info:ControlBar]', ...rest);
 const logWarn = (...rest) => console.warn('[Warn:ControlBar]', ...rest);

@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import { ControlBar } from "../../src/ControlBar";
+import { ControlBar } from "../../src/Components/ControlBar";
 import { Block, Page } from "./Component";
 
 export default () => {

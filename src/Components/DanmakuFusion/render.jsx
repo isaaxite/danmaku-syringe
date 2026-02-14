@@ -2,8 +2,8 @@ import { createSignal } from "solid-js";
 import VideoContainer from "../VideoContainer";
 import { DanmakuFusion } from "./index";
 import { render } from "solid-js/web";
-import { IconRadiusButton } from "../Component/Button";
-import { CollapseIcon } from "../Component/Svg";
+import { IconRadiusButton } from "../Common/Button";
+import { CollapseIcon } from "../Common/Svg";
 
 export const therealDanmakuFusionRender = (
   rootRef,

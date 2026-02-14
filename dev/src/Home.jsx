@@ -1,6 +1,6 @@
 import { createSignal } from "solid-js";
 import { Block, Page } from "./Component";
-import { Button } from "../../src/Component/Button";
+import { Button } from "../../src/Components/Common/Button";
 import { createRefValue } from "../../src/utils";
 // import { EntryBarView } from "../../src/EntryBar/View";
 // import EntryBar from "../../src/EntryBar";

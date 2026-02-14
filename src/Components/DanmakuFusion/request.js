@@ -1,5 +1,5 @@
-import { SINGLE_DANMAKU_STYLE } from "../constant";
-import { deduplicateDanmaku, plusRandomMS } from "../utils";
+import { SINGLE_DANMAKU_STYLE } from "../../constant";
+import { deduplicateDanmaku, plusRandomMS } from "../../utils";
 
 export async function requestVqqBatchDanmaku(vid, batch) {
   const startMS = batch * 30000;

@@ -1,5 +1,5 @@
 import { render } from "solid-js/web";
-import { DanmakuFusion } from "../../src/DanmakuFusion";
+import { DanmakuFusion } from "../../src/Components/DanmakuFusion";
 import { createMemo, onMount } from "solid-js";
 
 export default () => {

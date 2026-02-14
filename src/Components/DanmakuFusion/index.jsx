@@ -1,10 +1,10 @@
 import { createMemo, createSignal } from "solid-js";
 import { ControlBar } from "../ControlBar";
-import { createRefValue, DanmakuInjector, deduplicateDanmaku, plusRandomMS, xmlDanmakuToJson, YoukuDanmakuParser } from "../utils";
-import { DanmakuOperateType, DanmakuSource, FULLSCREEN_CHANGE_EVENTS, SINGLE_DANMAKU_STYLE, VIDEO_TIME_SLOT_UNIT } from "../constant";
+import { createRefValue, DanmakuInjector, deduplicateDanmaku, plusRandomMS, xmlDanmakuToJson, YoukuDanmakuParser } from "../../utils";
+import { DanmakuOperateType, DanmakuSource, FULLSCREEN_CHANGE_EVENTS, SINGLE_DANMAKU_STYLE, VIDEO_TIME_SLOT_UNIT } from "../../constant";
 import { requestVqqBatchDanmaku } from "./request";
-import { IconRadiusButton } from "../Component/Button";
-import { CollapseIcon } from "../Component/Svg";
+import { IconRadiusButton } from "../Common/Button";
+import { CollapseIcon } from "../Common/Svg";
 
 /**
  * 弹幕融合播放器组件 Props 类型

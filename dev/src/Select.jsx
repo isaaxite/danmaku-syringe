@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import { DropdownMenu } from "../../src/Component/Select";
+import { DropdownMenu } from "../../src/Components/Common/Select";
 import { Page } from "./Component";
 
 export default () => {

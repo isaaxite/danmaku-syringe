@@ -1,4 +1,4 @@
-import EntryBar from "../../src/EntryBar";
+import EntryBar from "../../src/Components/EntryBar";
 import { Page } from "./Component";
 
 export default () => {

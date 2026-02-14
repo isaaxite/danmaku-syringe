@@ -1,4 +1,4 @@
-import { Button, InlineButton, SimpleTooltip } from "../../src/Component/Button";
+import { Button, InlineButton, SimpleTooltip } from "../../src/Components/Common/Button";
 import { Block, Page } from "./Component"
 
 export default () => (

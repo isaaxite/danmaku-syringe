@@ -1,6 +1,6 @@
-import { findHighestMatchingAncestor } from "../utils";
+import { findHighestMatchingAncestor } from "../../utils";
 import { substituteDanmakuFusionRender, therealDanmakuFusionRender } from "../DanmakuFusion/render";
-import { ContainerType } from "../constant";
+import { ContainerType } from "../../constant";
 
 const getVideoRef = () => document.querySelector('video');
 

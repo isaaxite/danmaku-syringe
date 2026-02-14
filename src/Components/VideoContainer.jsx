@@ -1,5 +1,5 @@
 import { onMount } from "solid-js";
-import { isFunction } from "./utils";
+import { isFunction } from "../utils";
 
 const VideoContainer = (props) => {
   onMount(() => {

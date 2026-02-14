@@ -1,7 +1,7 @@
 import { createSignal } from "solid-js";
-import { HoverBlock } from "../../src/Component/HoverBlock";
+import { HoverBlock } from "../../src/Components/Common/HoverBlock";
 import { Page } from "./Component";
-import { InlineButton } from "../../src/Component/Button";
+import { InlineButton } from "../../src/Components/Common/Button";
 
 const BorderBox = (props) => {
   return (

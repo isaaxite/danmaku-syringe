@@ -1,7 +1,7 @@
 import { createSignal } from 'solid-js';
-import { CollapseIcon, DanmakuToggleIcon, SyringeIcon, ToggleFullscreenIcon } from '../../src/Component/Svg';
+import { CollapseIcon, DanmakuToggleIcon, SyringeIcon, ToggleFullscreenIcon } from '../../src/Components/Common/Svg';
 import { Block, InlineBlock, Page } from './Component';
-import { PureButton } from '../../src/Component/Button';
+import { PureButton } from '../../src/Components/Common/Button';
 
 
 export default () => {

@@ -1,9 +1,9 @@
 import { createMemo, createSignal, Match, Show, Switch } from "solid-js";
-import { Button, IconRadiusButton, PureButton, SimpleTooltip } from "../Component/Button";
-import { DropdownMenu } from "../Component/Select";
-import { ToggleIcon, DMWordsIcon, SyringeIcon } from "../Component/Svg";
-import { Checkbox, TextInput } from "../Component/Input";
-import { ContainerType } from "../constant";
+import { Button, IconRadiusButton, PureButton, SimpleTooltip } from "../Common/Button";
+import { DropdownMenu } from "../Common/Select";
+import { ToggleIcon, DMWordsIcon, SyringeIcon } from "../Common/Svg";
+import { Checkbox, TextInput } from "../Common/Input";
+import { ContainerType } from "../../constant";
 
 export const EntryBarView = (props) => {
   const [containerType, setContainerType] = createSignal(ContainerType.Thereal)

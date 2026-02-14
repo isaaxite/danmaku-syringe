@@ -1,8 +1,6 @@
+import "./style.css";
 import { onMount } from "solid-js";
-import "./style.css"
-// import Entry from "./Entry";
-import EntryBar from "./EntryBar";
-// import Menu from "./Menu";
+import EntryBar from "./Components/EntryBar";
 
 const App = () => {
   onMount(() => {

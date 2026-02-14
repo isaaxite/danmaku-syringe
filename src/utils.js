@@ -1,4 +1,4 @@
-import Danmaku from "danmaku";
+import Danmaku from "danmaku/dist/danmaku.dom.js";
 import { createMemo } from "solid-js";
 
 function decimalToHexColor(decimalColor) {

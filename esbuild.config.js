@@ -68,7 +68,7 @@ const cssInlinePlugin = {
 };
 
 const defOpt = {
-  entryPoints: ['./index.jsx'],
+  entryPoints: ['./index.js'],
   bundle: true,
   plugins: [
     solidPlugin(),

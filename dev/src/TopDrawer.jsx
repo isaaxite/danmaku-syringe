@@ -1,6 +1,6 @@
 import { createSignal } from "solid-js";
-import { InlineButton } from "../../src/Component/Button";
-import { TopDrawer } from "../../src/Component/Drawer";
+import { InlineButton } from "../../src/Components/Common/Button";
+import { TopDrawer } from "../../src/Components/Common/Drawer";
 import { Page } from "./Component";
 
 export default () => {

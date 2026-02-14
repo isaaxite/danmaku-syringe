@@ -1,8 +1,6 @@
 import { render } from "solid-js/web"
-// import App from "./src/Temp";
 import App from "./src/App";
 
-// render(App, document.getElementById('root'));
 const rootID = 'danmaku-migrate-ext';
 const rootRef = document.createElement('DIV');
 rootRef.setAttribute('id', rootID);

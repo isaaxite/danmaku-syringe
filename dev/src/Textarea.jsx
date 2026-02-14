@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import { Textarea } from "../../src/Component/Textarea";
+import { Textarea } from "../../src/Components/Common/Textarea";
 import { Block, Page } from "./Component";
 
 export default () => {

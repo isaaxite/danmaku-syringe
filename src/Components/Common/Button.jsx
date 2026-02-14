@@ -1,5 +1,5 @@
 import { splitProps, createSignal } from "solid-js";
-import { PRIMARY_CLASSNAMES } from "../constant";
+import { PRIMARY_CLASSNAMES } from "../../constant";
 
 export const InlineButton = (props) => {
   const [local, other] = splitProps(props, ['children']);

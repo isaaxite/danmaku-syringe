@@ -1,7 +1,7 @@
 import { createSignal } from "solid-js";
-import { Checkbox, TextInput, Upload } from "../../src/Component/Input";
+import { Checkbox, TextInput, Upload } from "../../src/Components/Common/Input";
 import { Page, InlineBlock, Block } from "./Component";
-import { InlineButton } from "../../src/Component/Button";
+import { InlineButton } from "../../src/Components/Common/Button";
 
 export default () => {
   const [text, setText] = createSignal('');

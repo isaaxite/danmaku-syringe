@@ -1,5 +1,5 @@
 import { createSignal, Index } from "solid-js";
-import { PRIMARY_CLASSNAMES, PRIMARY_FONTSIZE } from "../constant";
+import { PRIMARY_CLASSNAMES, PRIMARY_FONTSIZE } from "../../constant";
 
 export const DropdownMenu = (props) => {
   const getOpts = () => props.options;

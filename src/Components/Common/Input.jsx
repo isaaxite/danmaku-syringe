@@ -1,5 +1,5 @@
 import { createSignal, splitProps } from "solid-js";
-import { generateRandomString } from "../utils";
+import { generateRandomString } from "../../utils";
 
 export const TextInput = (props) => {
   const [local, other] = splitProps(props, [
