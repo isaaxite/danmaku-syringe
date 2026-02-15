@@ -713,6 +713,141 @@ src/DanmakuFuion
   1 directory, 2 files
 ```
 
+
+# 样式污染
+
+- shadow dom
+
+
+
+```js
+const element = document.createElement('div');
+const shadow = element.attachShadow({ mode: 'open' });
+```
+
+**样式完整穿透对照表**
+
+| 样式类型 | 是否穿透 | 原因 | 例子 |
+|---------|---------|------|------|
+| **可继承属性** | ✅ 穿透 | CSS 规范 | color, font-size |
+| **CSS 变量** | ✅ 穿透 | 规范设计 | var(--theme) |
+| **@font-face** | ✅ 穿透 | 资源共享 | 字体定义 |
+| **@keyframes** | ⚠️ 定义穿透 | 资源共享 | 动画名称 |
+| **媒体查询条件** | ⚠️ 条件穿透 | 视口共享 | @media |
+| **基于选择器的样式** | ❌ 不穿透 | 封装隔离 | .class, #id |
+| **非继承属性** | ❌ 不穿透 | 规范定义 | background |
+| **内联样式** | ❌ 不穿透 | DOM 隔离 | style="..." |
+| **系统颜色模式** | ⚠️ 部分穿透 | 系统级 | forced-colors |
+| **打印样式** | ⚠️ 部分穿透 | 全局行为 | @print |
+
+---
+
+## **对你的实际意义**
+
+```javascript
+// 在油猴脚本中，你需要关注的是：
+const shadow = container.attachShadow({ mode: 'open' });
+
+shadow.innerHTML = `
+  <style>
+    /* 1. 重置可能继承的属性 */
+    :host {
+      all: initial;  /* 重置所有属性 */
+      display: block;
+    }
+    
+    /* 2. 显式设置可继承属性，防止意外继承 */
+    * {
+      color: initial;
+      font-size: medium;
+      line-height: normal;
+    }
+    
+    /* 3. 你的 Tailwind 样式 */
+    .bg-blue-500 { background-color: #3b82f6; }
+    .text-white { color: white; }
+  </style>
+  
+  <div class="bg-blue-500 text-white">
+    <!-- 只有 CSS 变量和可继承属性可能穿透到这里 -->
+  </div>
+`;
+
+// 需要特别注意：
+// - 外部设置的 color 可能会影响你（如果不重置）
+// - 外部 CSS 变量可能会影响你（如果不重新定义）
+// - 外部字体定义可以正常使用（通常这是好事）
+// - 外部的基于选择器的样式永远不会影响你
+```
+
+- 使用 !important 和特定前缀
+
+```js
+// tailwind.config.js
+module.exports = {
+  prefix: 'tw-', // 添加前缀
+  important: true, // 添加 !important
+  corePlugins: {
+    preflight: false, // 禁用预检样式，避免重置网站样式
+  }
+}
+```
+
+PS： 添加了前缀，使用时也需要追加：`div class="tw-bg-blue-500 tw-text-white tw-p-4"`
+
+
+- 使用 iframe 隔离
+
+与父页面直接交互（需 postMessage）
+
+
+- 哈希化 tailwindcss
+
+目的是让 tailwindcss 的类名唯一化
+
+- 机器人提供的综合性方案
+
+其中某些有可取行，无需完全使用
+
+```js
+// 最佳实践组合
+(function() {
+    const wrapper = document.createElement('div');
+    wrapper.id = 'my-script-root';
+    wrapper.style.all = 'initial'; // 重置所有样式
+    
+    // 使用 shadow DOM
+    const shadow = wrapper.attachShadow({ mode: 'closed' });
+    
+    // 加载 Tailwind
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://cdn.jsdelivr.net/npm/tailwindcss@2/dist/tailwind.min.css';
+    shadow.appendChild(link);
+    
+    // 添加额外保护样式
+    const style = document.createElement('style');
+    style.textContent = `
+      * {
+        box-sizing: border-box;
+      }
+    `;
+    shadow.appendChild(style);
+    
+    document.body.appendChild(wrapper);
+    
+    // 你的内容
+    const content = document.createElement('div');
+    content.className = 'bg-blue-500 text-white p-4 rounded-lg';
+    content.textContent = '隔离的 Tailwind 样式';
+    shadow.appendChild(content);
+})();
+```
+
+*当前使用了 `shadow dom` 方案，效果不错，暂未发现异常*
+
 # 附录
 
 - [esbuild 中文文档](https://esbuild.org.cn)
+
+

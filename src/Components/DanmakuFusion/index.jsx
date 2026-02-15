@@ -11,6 +11,7 @@ import { CollapseIcon } from "../Common/Svg";
  * @typedef {Object} DanmakuFusionProps
  * 
  * @property {HTMLDivElement} rootRef - 弹幕根容器引用（必需）
+ * @property {HTMLDivElement} shadowRef - 弹幕根容器引用（必需）
  * @property {HTMLVideoElement} videoRef - 视频元素引用（必需）
  * @property {Boolean} showCollapseBtn - 是否展示 Collapse Button（可选）
  * @property {Function} onClickCollapseBtn - 点击 Collapse Button 时触发
@@ -24,7 +25,7 @@ export const DanmakuFusion = (props) => {
   const [timeCount, setTimeCount] = createRefValue(-1);
   const [getZenCursorTimer, setZenCursorTimer] = createRefValue(0);
   const [danmakuInjector] = createRefValue(new DanmakuInjector({
-    rootRef: props.rootRef,
+    rootRef: props.shadowRef,
     videoRef: props.videoRef,
   }));
 

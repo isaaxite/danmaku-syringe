@@ -13,7 +13,8 @@ function getPackageJsonObject() {
 const DEF_MATCH_LIST = [
   'https://danmu.yhdmjx.com/m3u8.php?*',
   'https://player.cycanime.com/?*',
-  'https://art.v2player.top:8989/player/?*'
+  'https://art.v2player.top:8989/player/?*',
+  'https://www.libvio.site/vid/plyr/*',
 ];
 
 function getTempermonkeyUserScriptHeader() {
@@ -60,6 +61,7 @@ const cssInlinePlugin = {
               document.head.appendChild(style);
             });
           }
+          window.tailwindcssContent = style.textContent;
         `,
         loader: 'js',
       };

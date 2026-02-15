@@ -1,5 +1,6 @@
 import Danmaku from "danmaku/dist/danmaku.dom.js";
 import { createMemo } from "solid-js";
+import { render } from "solid-js/web";
 
 function decimalToHexColor(decimalColor) {
   // 确保是整数
@@ -450,4 +451,13 @@ export function plusRandomMS(originTimeSec, msRange) {
   const randomMS = Number.parseInt(Math.random() * msRange);
   time = (time * msRange + randomMS) / msRange;
   return time;
+}
+
+export function createRoot(parentElement, { id, classList }) {
+  const rootRef = document.createElement('DIV');
+  rootRef.setAttribute('id', id || '');
+  rootRef.classList = classList || '';
+  parentElement.appendChild(rootRef);
+  const shadowRef = rootRef.attachShadow({ mode: 'open' });
+  return { shadowRef, rootRef };
 }
