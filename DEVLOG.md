@@ -846,6 +846,478 @@ PS： 添加了前缀，使用时也需要追加：`div class="tw-bg-blue-500 tw
 
 *当前使用了 `shadow dom` 方案，效果不错，暂未发现异常*
 
+
+# version | github action | tag 触发 | 自动化 github release 包
+
+- alpha: vx.x.x-alpha.x
+- rc: vx.x.x
+
+```shell
+npm run alpha
+npm run rc
+```
+
+# 使用 release-please
+
+release-please 不是 npm 包，不能直接安装到项目，执行命令运行。它是 github-action 的一个 名为 [Release Please Action](https://github.com/marketplace/actions/release-please-action) 的，可以在 [Github Marketplace](https://github.com/marketplace?type=actions) 可以搜索相关的 actions。
+
+## 如何将 release-please 添加到 js/nodejs 项目？
+
+既然是 actions，那么则需要在项目添加 `.github/workflows/` 目录，并在词目录下添加与 release-please 相关的 `.yml` github-action 配置文件。
+
+## release-please 在何时第一次发挥作用？
+
+既然是 actions，何时触发，全凭 github-action 配置文件定义。机器人推荐的触发时机，是监听 main 分支的推送：
+
+```yml
+name: release-please
+on:
+  push:
+    branches:
+      - main  # 监听 main 分支的推送
+```
+
+## 第一次发挥了那些作用？
+
+它被触发后，会做什么，这是值得关注的。
+
+**Step 1**：扫描（是本人推理的）git log 中的 commit 信息，与上次（如果有的话）的版本做 diff，判断是否有值得让它做处理的 commit 信息；
+
+那些是值得让它做处理的 commit 信息？
+
+它假定你 commit 使用的了 [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) 规范。因此，不符合的将被忽略。
+
+即使是符合规范的 commuit，也并非会触发它的后续动作，下面是引用自它 readme 中提到的几种 `type` 的commit：
+
+> The most important prefixes you should have in mind are:
+>
+>    `fix:` which represents bug fixes, and correlates to a SemVer patch.
+>    `feat:` which represents a new feature, and correlates to a SemVer minor.
+>    `feat!:`, or `fix!:`, `refactor!:`, etc., which represent a breaking change (indicated by the `!`) and will result in a SemVer major.
+
+
+**Step 2**：计算版号。详细的过程不清楚，但可以预见的是：
+
+- feat 自增 minor 版号；
+- fix 自增 patch 版号；
+- feat! 自增 major 版号；
+
+但项目当然大部分情况下，不止一个或一种 commit，最后版号结果就看它的算法了。
+
+**Step 3**：存在待处理的 commit 的下一步，则是利用这些数据生成 CHANGELOG；
+
+**Step 4**：创建 Release PR，若已存在 Release PR 则更新；
+
+**Step 5**：等待用户（你）手动合并这个 Release PR 。合并后前几个步骤的内容才会实际生效。合并后，还会打 Git Tag。
+
+以上的步骤是个人对 release-please 作用的理解。
+
+## release-please 的 github-action 配置文件，如何编写？
+
+1. 确定你的工作流；
+2. 编写符合工作流的 release-please/github-action 配置。
+
+
+### 工作流
+
+step 1：把合并了 commits （预期会触发 release-please 核心流程的）的本地 main 分支 push；
+
+step 2：release-please 创建 release pr；
+
+step 3：合并 pr；
+
+step 4：这不是 release-please 的能力：触发构建打包代码的生产产物；
+
+step 5：将生产产物，发布到 github release。
+
+---
+
+新的构建思路：
+
+step 1：push main；
+
+step 2：构建产物
+
+step 3.1：构建失败，停止；
+
+step 3.2：构建成功，上传产物都暂存区域，release-pr；
+
+step 4.1「作为优化，延后处理」：产物过期，阻止合并。重新构建产物，更新 pr；
+
+step 4：合并 pr
+
+step 5：下载暂存区产物，发布 github release
+
+### release-please/github-action 配置
+
+配置文件位置：`<你的项目根目录>/.github/workflows/release-please.yml`。
+
+附录中的 [`release-please.yml`]() 是一份未经过验证的，由机器人提供的配置。有一定的参考意义，其中部分内容还不太了解去含义与作用。
+
+- `jobs.<job>.outputs`
+- github action 的 `if` 语法；
+- actions/checkout 的作用
+
+
+*`jobs.<job>.outputs`*
+
+在 `outputs` 中定义的内容，对下游的 `job` 可见。用 docs 的说法是：“create a `map` of outputs for a job”。
+
+以下是 outputs 的其中一个定义，以此为例子，说明定义的方法。
+
+```yml
+release_created: ${{ steps.release.outputs.release_created }}
+```
+
+- `release_created`：定义的变量名；
+- `steps.release.outputs.release_created`：`release` 是下文定义的某个 step 的 id，它不是固定，由开发者命名。`steps.release.outputs`，相当于是：读取名为 `release` 的 `step` 的 `outputs` 对象（js 的概念），`outputs.release_created`，则是 `outputs` 这个对象的一个属性。
+
+因此，上面这句代码，是类似赋值语句的存在。
+
+
+### 测试结果（临时记录）
+
+#### 合并 pr 前
+
+- 先前无执行过，第一次添加 release-please 也可触发 workflow
+- 需要手动在项目的 [Setting > Actions > General > Workflow permissions](https://github.com/isaaxite/test-rp/settings/actions) 栏目下勾选 `Allow GitHub Actions to create and approve pull requests `
+
+#### 合并 pr 后
+
+- 会生成 release note
+- Assets 中会打包两个格式的源码：zip 和 tar.gz
+
+下载，解包后得到的是整个项目（github 上的）的保留目录结构的源码
+
+## 附录
+
+### `release-please.yml`
+
+测试有效
+
+```yml
+on:
+  push:
+    branches:
+      - main  # 监听 main 分支的推送
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+name: release-please
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      # 把这些输出传递给下一个 job
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: node
+
+  build-and-upload:
+    runs-on: ubuntu-latest
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref }}  # 检出触发 Release 的那个 commit
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm i --frozen-lockfile
+
+      - name: Cache dependencies
+        uses: actions/cache@v5
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('./pnpm-lock.yaml') }}
+
+      - name: Build artifact
+        run: npm run prod
+
+      - name: Upload build artifact to Release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/index.js
+          asset_name: danmaku-syringe.user.js
+          tag: ${{ needs.release-please.outputs.tag_name }}
+          overwrite: true
+```
+
+测试有效，但和上面的无大区别。合并 pr 后，才构建产物。
+
+```yml
+on:
+  push:
+    branches:
+      - main  # 监听 main 分支的推送
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+name: release-please
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      # 把这些输出传递给下一个 job
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: node
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref }}  # 检出触发 Release 的那个 commit
+        if: ${{ steps.release.outputs.release_created }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+        if: ${{ steps.release.outputs.release_created }}
+
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm i --frozen-lockfile
+        if: ${{ steps.release.outputs.release_created }}
+
+      - name: Cache dependencies
+        uses: actions/cache@v5
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('./pnpm-lock.yaml') }}
+        if: ${{ steps.release.outputs.release_created }}
+
+      - name: Build artifact
+        run: npm run prod
+        if: ${{ steps.release.outputs.release_created }}
+
+      - name: Upload build artifact to Release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/index.js
+          asset_name: danmaku-syringe.user.js
+          tag: ${{ steps.release.outputs.tag_name }}
+          overwrite: true
+        if: ${{ steps.release.outputs.release_created }}
+```
+
+产物下载失败
+
+```yml
+on:
+  push:
+    branches:
+      - main  # 监听 main 分支的推送
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+name: version release
+
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+    outputs:
+      # 把这些输出传递给下一个 job
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      pr: ${{ steps.release.outputs.pr }}
+      pr_number: ${{ steps.release.outputs.pr_number }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: node
+
+  build-artifact:
+    needs: create-release-pr
+    runs-on: ubuntu-latest
+    if: ${{ needs.create-release-pr.outputs.pr }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref }}  # 检出触发 Release 的那个 commit
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+
+      - name: Cache dependencies
+        id: cache-dependencies
+        uses: actions/cache@v5
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('./pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: npm install -g pnpm && pnpm i --frozen-lockfile
+
+      - name: Build artifact
+        run: npm run prod
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: danmaku-syringe-pr
+          path: dist/
+          if-no-files-found: error
+          retention-days: 3
+        
+  upload-to-release:
+    needs:
+      - create-release-pr
+    runs-on: ubuntu-latest
+    if: ${{ needs.create-release-pr.outputs.release_created }}
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: danmaku-syringe-pr
+          path: ./dist
+
+      - name: List downloaded files
+        run: |
+          echo "查看下载的文件："
+          ls -la ./dist/
+          echo "查看 index.js 是否存在："
+          ls -la ./dist/index.js || (echo "❌ index.js 不存在" && exit 1)
+
+      - name: Upload build artifact to Release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./dist/index.js
+          asset_name: danmaku-syringe.user.js
+          overwrite: true
+
+```
+
+当前使用
+
+```yml
+name: version release
+
+on:
+  push:
+    branches:
+      - main  # 监听 main 分支的推送
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+    outputs:
+      # 把这些输出传递给下一个 job
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      pr: ${{ steps.release.outputs.pr }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: node
+  
+  build-artifact:
+    needs: create-release-pr
+    runs-on: ubuntu-latest
+    if: ${{ needs.create-release-pr.outputs.release_created || needs.create-release-pr.outputs.pr }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref }}  # 检出触发 Release 的那个 commit
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+      
+      - name: Cache dependencies
+        id: cache-dependencies
+        uses: actions/cache@v5
+        with:
+          path: ./node_modules
+          key: dependencies-${{ runner.os }}-node-${{ hashFiles('./pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: npm install -g pnpm && pnpm i --frozen-lockfile
+
+      - name: Build artifact
+        run: npm run prod
+
+      - name: Upload build artifact
+        if: needs.create-release-pr.outputs.release_created
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact-${{ needs.create-release-pr.outputs.version }}
+          path: ./dist
+
+  upload-to-release:
+    needs:
+      - create-release-pr
+      - build-artifact
+    runs-on: ubuntu-latest
+    if: ${{ needs.create-release-pr.outputs.release_created }}
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact-${{ needs.create-release-pr.outputs.version }}
+          path: ./dist
+
+      - name: Upload build artifact to Release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./dist/index.js
+          asset_name: danmaku-syringe-${{ needs.create-release-pr.outputs.version }}.user.js
+          overwrite: true
+          tag: ${{ needs.create-release-pr.outputs.tag_name }}
+
+```
+
 # 附录
 
 - [esbuild 中文文档](https://esbuild.org.cn)

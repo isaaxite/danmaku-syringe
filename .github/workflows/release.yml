@@ -1,0 +1,85 @@
+name: version release
+
+on:
+  push:
+    branches:
+      - main  # 监听 main 分支的推送
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+    outputs:
+      # 把这些输出传递给下一个 job
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      pr: ${{ steps.release.outputs.pr }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: node
+  
+  build-artifact:
+    needs: create-release-pr
+    runs-on: ubuntu-latest
+    if: ${{ needs.create-release-pr.outputs.release_created || needs.create-release-pr.outputs.pr }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref }}  # 检出触发 Release 的那个 commit
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+      
+      - name: Cache dependencies
+        id: cache-dependencies
+        uses: actions/cache@v5
+        with:
+          path: ./node_modules
+          key: dependencies-${{ runner.os }}-node-${{ hashFiles('./pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: npm install -g pnpm && pnpm i --frozen-lockfile
+
+      - name: Build artifact
+        run: npm run prod
+
+      - name: Upload build artifact
+        if: needs.create-release-pr.outputs.release_created
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact-${{ needs.create-release-pr.outputs.version }}
+          path: ./dist
+
+  upload-to-release:
+    needs:
+      - create-release-pr
+      - build-artifact
+    runs-on: ubuntu-latest
+    if: ${{ needs.create-release-pr.outputs.release_created }}
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifact-${{ needs.create-release-pr.outputs.version }}
+          path: ./dist
+
+      - name: Upload build artifact to Release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./dist/index.js
+          asset_name: danmaku-syringe-${{ needs.create-release-pr.outputs.version }}.user.js
+          overwrite: true
+          tag: ${{ needs.create-release-pr.outputs.tag_name }}
