@@ -1,6 +1,6 @@
 {
 	"name": "danmaku-syringe",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"description": "Tampermonkey script. A script that injects danmaku into third-party video websites, with partial support for real-time danmaku and full support for offline danmaku.",
 	"main": "dist/index.js",
 	"scripts": {
@@ -8,7 +8,7 @@
 		"prod": "NODE_ENV=production node esbuild.config.js"
 	},
 	"ntl": {
-		"descriptions" : {
+		"descriptions": {
 			"prod": "打包生产包（./disr/index.js）",
 			"dev": "Watch 模式|本地服务|浏览器调试。打包产物（dev/dist/）: [业务|index.js]+[开发调|byproduct.js]"
 		}
