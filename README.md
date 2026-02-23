@@ -2,35 +2,14 @@
 
 # 安装
 
-## 克隆项目到本地
+务必确认 [Tampermonkey](https://www.tampermonkey.net/index.php?locale=zh) 已被安装：
 
-```shell
-git clone https://github.com/isaaxite/danmaku-syringe.git
-```
+- [Tampermonkey – Get this Extension for Firefox (en-US)](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)
+- [Tampermonkey - Chrome Web Store](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
+- [Tampermonkey - Microsoft Edge Addons](https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd)
 
-## 打包环境
 
-- `node >= 18.20.8`；
-- `pnpm >= 10.17.1`。
-
-## 安装项目依赖
-
-```shell
-pnpm install
-```
-
-## 打包项目
-
-```shell
-npm run pord
-```
-
-## 创建油猴脚本
-
-1. 复制 `./dist/index.js` 内容；
-2. 油猴插件菜单：`dashboad`；
-3. 油猴 dashboad：`Create a script`；
-4. 将复制的内容，粘贴并保存。
+然后，[点击这里](https://github.com/isaaxite/danmaku-syringe/releases/download/v1.0.0/danmaku-syringe-1.0.0.user.js)安装 danmaku-syringe。
 
 # 脚本使用
 
