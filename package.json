@@ -7,18 +7,23 @@
 		"dev": "NODE_ENV=development node esbuild.config.js",
 		"prod": "NODE_ENV=production node esbuild.config.js",
 		"prepare": "husky",
-		"commit": "commit"
+		"commit": "git-cz"
 	},
 	"ntl": {
 		"descriptions": {
 			"prod": "打包生产包（./disr/index.js）",
 			"dev": "Watch 模式|本地服务|浏览器调试。打包产物（dev/dist/）: [业务|index.js]+[开发调|byproduct.js]",
 			"prepare": "npm 的一个生命周期钩子，npm install/pnpm install 会触发",
-			"commit": "交互式添加符合 Conventional Commits 规范的 git commit"
+			"commit": "commitizen, 交互式添加符合 Conventional Commits 规范的 git commit"
 		}
 	},
 	"commitlint": {
 		"extends": "@commitlint/config-conventional"
+	},
+	"config": {
+		"commitizen": {
+			"path": "@commitlint/cz-commitlint"
+		}
 	},
 	"keywords": [
 		"danmaku",
@@ -33,13 +38,15 @@
 	"devDependencies": {
 		"@commitlint/cli": "^20.4.2",
 		"@commitlint/config-conventional": "^20.4.2",
-		"@commitlint/prompt-cli": "^20.4.2",
+		"@commitlint/cz-commitlint": "^20.4.1",
 		"@solidjs/router": "^0.15.4",
 		"@tailwindcss/postcss": "^4.1.18",
 		"autoprefixer": "^10.4.23",
+		"commitizen": "^4.3.1",
 		"esbuild": "^0.27.2",
 		"esbuild-plugin-solid": "^0.6.0",
 		"husky": "^9.1.7",
+		"inquirer": "^9.3.8",
 		"ntl": "^5.1.0",
 		"postcss": "^8.5.6",
 		"xml2js": "^0.6.2"
