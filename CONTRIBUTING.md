@@ -1,103 +1,170 @@
+# 贡献指南 For Author
 
-# 前言
+## 开发前
 
-package.json 中 script 命令，可使用 ntl 交互式执行。
+确保开发环境已安装：
 
-```shell
-npx ntl
+- nodejs >= v20.19.6；
+
+- pnpm >= 10.17.1；
+
+## 书写惯例
+
+### 原始网页
+
+当前脚本注入第三方视频网站提供增强体验，而这个第三方视频网站成为*原始网页*。
+
+### 视频区块
+
+如下图，[视频容器](#视频容器)与 `<video>`组成的结构称为视频区块。`<video>`与视频容器的关系：父子或祖先与后代。
+
+```mermaid
+---
+config:
+  treemap:
+    showValues: false
+---
+treemap-beta
+"<div>"
+  "..."
+    "<video>": 20
 ```
 
-# 运行环境
+#### 视频容器
 
-node 版本：主要在 `v20.19.6` 版本下做开发，其次是 `v18.20.8`。并非仅这两个版本可用，其他或可，只是未尝试。
+`<video>` 的任意祖先容器，只要符合改变容器尺寸，video 的尺寸随之改变且铺满的，都可作为[视频容器](#视频容器)，与 video 组成[视频区块](#视频区块)结构。
 
-# 项目依赖安装
+### 弹幕视频区块
 
-使用 `pnpm` 作为 `npm` 包管理工具。`pnpm` 版本： `10.17.1`。
+在视频区块的基础上，插入 `video` 的兄弟节点`<DanmakuFusion />`即是*弹幕视频区块*。`<DanmakuFusion />`的功能是注入[原始网页](#原始网页)，提供弹幕能力的 JSX 组件。
 
-在依赖安装前先确实已经安装 `pnpm`：
-
-```shell
-pnpm -v
+```mermaid
+---
+config:
+  treemap:
+    showValues: false
+---
+treemap-beta
+"<div>"
+  "..."
+    "<video>": 20
+    "<DanmakuFusion />": 30
 ```
 
-依赖安装
+## 安装依赖
 
 ```shell
 pnpm install
 ```
 
-# 核心依赖
+## 运行
+
+开发模式，运行项目。将在 watch 模式下启动本地 web 服务，其根目录是 `./dev`，监听 `8000` 端口。
+
+```shell
+$ npm run dev
+
+> danmaku-syringe@1.0.0 dev
+> NODE_ENV=development node esbuild.config.js
+
+> http://localhost:8000/
+```
+
+watch 模式监听以 `./dev/index.js`（[调试模块](#调试模块)） 和 `./index.js`（[业务模块](#业务模块)） 为入口的代码变动，构建得到产物：
+
+```shell
+./dev/dist
+├── byproduct.js      # ./dev/index.js
+├── byproduct.js.map
+├── index.js          # ./index.js
+└── index.js.map
+```
+
+`./dev/index.html`先后引入`byproduct.js` 和 `index.js`：
+
+```html
+<script src="./dist/byproduct.js"></script>
+<script src="./dist/index.js"></script>
+```
+
+成功运行后可在浏览器访问：`localhost:8000/` 访问 `./dev/index.html` 页面。此页面可用于：
+
+- 开发调试；
+- 初次接触或复健时，体验能力。
+
+此页除了可体验/调试完整主流程外，还可通过各哈希入口体验/调试更细致的能力。
+
+## 编写代码前
+
+在编写代码前，或许需要了解：
+
+- [项目的核心依赖](#核心依赖)；
+- [代码构成](#代码构成)；
+- [工作流](#工作流)；
+- [Git 分支](#git-分支)；
+- [Git Commit](#git-commit)。
+
+## 核心依赖
 
 技术栈构成：`solid-js`、`tailwindcss` 和 `danmaku`。
 
-- `solid-js`：类似 `react` 的前端框架，但更轻量级；
-- `tailwindcss`：样式库，原子级别。作为实验性工具被选用，未来考虑替换更优的；
-- `danmaku`：核心。弹幕渲染库。
+- `solid-js@1.9.11`：类似 `react` 的前端框架，但更轻量级；
+- `tailwindcss@4.1.18`：样式库，原子级别。作为实验性工具被选用，未来考虑替换更优的；
+- `danmaku@2.0.9`：核心。弹幕渲染库。
 
-实际使用的版本：
+### 延伸
 
-- `danmaku：2.0.9`，文档：https://github.com/weizhenye/Danmaku； Demo 体验：https://danmaku.js.org/；
-- `tailwindcss：4.1.18`；文档：https://tailwindcss.com；
-- `solid-js：1.9.11`，文档：https://solidjs.com。
+- `danmaku`
+  - 文档：<https://github.com/weizhenye/Danmaku>
+  - Demo 体验：<https://danmaku.js.org/>
+- `tailwindcss` 文档：<https://tailwindcss.com>
+- `solid-js` 文档：<https://solidjs.com>
 
+## 代码构成
 
-# 运行以开发
+- 业务模块
+- 调试模块
+- 配置模块
+- 其他
+
+### 业务模块
 
 ```shell
-npm run dev
-```
-
-成功运行后可在浏览器访问：`localhost:8000/`，进行开发调试（支持热更新）。
-
-# 业务代码目录结构
-
-```shell
-$ tree
 .
-├── ...
-├── index.jsx
-├── ...
-├── src
-│   ├── App.jsx
-│   ├── Component/
-│   ├── constant.js
-│   ├── ControlBar.jsx
-│   ├── DanmakuFusion
-│   │   ├── index.jsx
-│   │   ├── render.jsx
-│   │   └── request.js
-│   ├── EntryBar
-│   │   ├── index.jsx
-│   │   ├── Logic.jsx
-│   │   └── View.jsx
-│   ├── style.css
-│   ├── utils.js
-│   └── VideoContainer.jsx
-└── ...
+├── index.js                # 代码入口
+├── dist/                   # 生产构建产物输出目录
+└── src
+    ├── App.jsx             # 代码次入口
+    ├── Components
+    │   ├── Common/         # 通用 UI 组件
+    │   ├── ControlBar.jsx
+    │   ├── DanmakuFusion
+    │   │   ├── index.jsx
+    │   │   ├── render.jsx
+    │   │   └── request.js
+    │   ├── EntryBar 
+    │   │   ├── index.jsx
+    │   │   ├── Logic.jsx
+    │   │   └── View.jsx
+    │   └── VideoContainer.jsx
+    ├── constant.js
+    ├── style.css
+    └── utils.js
 ```
 
-- `index.jsx` 是入口文件，负责渲染次入口（`App.jsx`）；
-- `App.jsx` 由 `EntryBar` 组件构成，上屏的初见页面；
-- `EntryBar` 按需渲染 `DanmakuFusion` 组件；
-- `DanmakuFusion` 由 `ControlBar` 和 `VideoContainer` 组成。
+### 调试模块
 
-# 开发调试
-
-执行 `npm run dev`，除了打包业务代码外，还会另外打包 `dev/` 目录下代码以调试业务代码，及业务代码中使用到的组件。
+调试模块用于调试业务模块，代码位于 `./dev`，它不会打包进生产包。
 
 ```shell
-├── asset/ # 调试用到的资源
-├── dist  # npm run dev 构建的产物
-│   ├── byproduct.js  # dev/ 代码的构建产物
-│   ├── byproduct.js.map
-│   ├── index.js  # 业务代码构建产物
-│   └── index.js.map
-├── index.html  # localhost:8000/ 访问的页面，分别引入了 byproduct.js 和 index.js
-├── index.jsx # 入口文件，使用 solidjs 的路由组件分发 dev/src/ 下的页面
-└── src # 除了 Component/ 外，其余每个组件对应一个页面，index.html 中可通过哈希路由访问
+./dev
+├── asset/
+├── dist/               # 构建产物输出目录，包含调试模块的构建产物文件和业务模块的构建产物文件
+├── index.html          # 调试服务（localhost:8000/）访问的页面
+├── index.jsx           # 代码入口，其中包含路由逻辑
+└── src                 # 路由页面目录
     ├── Button.jsx
-    ├── Component
+    ├── Component       # 公共组件，非路由页面
     │   └── index.jsx
     ├── ControlBar.jsx
     ├── DanmakuFusion.jsx
@@ -111,39 +178,77 @@ $ tree
     └── TopDrawer.jsx
 ```
 
-# 分支规范
+### 配置模块
+
+```shell
+.
+├── esbuild.config.js   # 构建配置
+├── .github
+│   └── workflows
+│       └── release.yml # ci/cd 配置：github-action
+├── .gitignore
+├── .husky
+│   ├── _/
+│   └── commit-msg      # commit 规范配置
+├── package.json        # commit 规范配置：{}.commitlint 和 {}.config.commitizen
+└── tailwind.config.js  # 样式配置
+```
+
+### 其他
+
+```shell
+.
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── DEVLOG.md       # 开发过程中的手札
+├── LICENSE
+├── pnpm-lock.yaml
+└── README.md
+
+```
+
+## 工作流
+
+```mermaid
+sequenceDiagram
+  autonumber
+
+participant m as 分支：main
+participant n as 新分支：<type>/<subject>
+participant gh as Github
+
+Note over m: 确保分支工作区干净
+
+m->>+gh: git pull origin main
+gh-->>-m: 更新本地代码
+
+m->>n: 创建
+n->>n: npm run dev
+note over n: watch 模式构建代码；监听 8000 端口，创建 web 服务
+
+loop 分支下的子任务目标
+  n->>n: 修改代码
+  note right of n: 调试代码 (http://localhost:8000)
+  n->>n: git commit
+end
+
+n-->>m: 返回
+m->>m: git merge <type>/<subject>
+m->>gh: git push origin main
+note over m,gh: 若 push 失败。可能有冲突，使用 --rebase 拉取代码后解决冲突
+gh-->>m: 完成
+
+create participant gha as Github Action
+gh->>gha: release-please
+note over gh,gha: 创建 pr：<br/>生成 CHANGELOG<br/>自增版号<br/>发布 Github Releases
+gha-->>gh: 完成
+```
+
+## Git 分支
 
 核心分支：`main`
 
-开发分支：`<type>/xxx`，`type` 沿用 Angular 规范的 `type`，详细见 Commit 规范章节。
-
-# Commit 规范
-
-使用 Angular 规范。Angular 规范要求每个 commit message 都包含三个部分：Header、Body 和 Footer。其中，Header 包含一个必填字段和一个可选字段，必填字段为 Type，可选字段为 Scope。Body 和 Footer 都是可选的，用于提供更详细的信息。
-
-**Angular 规范的格式为：**
-
-```shell
-<type>[(scope)]: <subject>
-
-[body]
-
-[footer]
-
-# e.g.
-# slim
-feat: add user management module
-
-# fully
-feat(users): add user management module
-
-This commit adds the user management module to the project.
-
-Closes #123
-```
-其中，`<type>` 表示 commit 的类型，`[scope]` 表示 commit 的影响范围，`<subject>` 表示 commit 的简短描述，`[body]` 表示 commit 的详细描述，`<footer>` 表示 commit 的元信息，如关闭 issue、引入变更等。
-
-**Type 字段包含以下值：**
+开发分支：`<type>/<subject>`，`type` 沿用 [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) 规范的部分 type：
 
 - `feat`：新功能
 - `fix`：修复问题
@@ -155,16 +260,42 @@ Closes #123
 - `build`：构建系统或外部依赖项修改
 - `ci`：持续集成修改
 - `chore`：其他修改，如修改构建流程或辅助工具等
-- `revert`：回滚到之前的提交
 
-# 生产环境调试
+### 创建分支前
+
+```shell
+git fetch origin
+git pull origin main
+```
+
+### 推送分支前
+
+```shell
+git pull --rebase origin main
+```
+
+若存在冲突，解决冲突后使用：
+
+```shell
+git rebase --continue
+```
+
+## Git Commit
+
+交互式创建 commit，遵循 [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) 规范。
+
+```shell
+npm run commit
+```
+
+## 生产环境调试
 
 当前开发的版本是针对油猴脚本可能性。对此， 2 个点需要关注：
 
 1. 如何构建生产包；
 2. 如何对当前生产包做油猴脚本的匹配性修改；
 
-## 生产包构建
+### 生产包构建
 
 ```shell
 npm run pord
@@ -172,7 +303,7 @@ npm run pord
 
 产物位置是 `./dist/index.js`。
 
-## 匹配性修改
+### 匹配性修改
 
 修改 `esbuild.config.js` 的内容。
 
@@ -183,8 +314,13 @@ const DEF_MATCH_LIST = [
   'https://art.v2player.top:8989/player/?*'
 ];
 ```
+
 以上三个匹配地址非直接访问的视频网站，而是它们内嵌的 `iframe` 地址，下面是各自对应关系：
 
 - `https://art.v2player.top:8989/player/?*` -> [omofun动漫](https://www.omofuna.com)
 - `https://player.cycanime.com/?*` -> [次元城动画](https://www.cycani.org/)
 - `https://danmu.yhdmjx.com/m3u8.php?*` -> 不清楚，可能是 [NT动漫](https://ntdm8.com/)。它目前已经失效。
+
+## 附录
+
+- [Mermaid > Treemap Diagram](https://mermaid.js.org/syntax/treemap.html#treemap-diagram)
